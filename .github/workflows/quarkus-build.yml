@@ -15,7 +15,7 @@ jobs:
           cache: 'maven'
       - name: Build with Maven
         working-directory: ./api
-        run: mvn -B package --file pom.xml -Dmaven.test.skip=true
+        run: ./mvnw -B package --file pom.xml -Dmaven.test.skip=true
       - name: Test with Quarkus
-        working-directory: ./workshop
+        working-directory: ./api
         run: ./mvnw test -Dquarkus.test.continuous-testing=disabled
