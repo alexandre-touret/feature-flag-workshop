@@ -55,7 +55,7 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Google-style Code Lab',
+      title: 'Feature-Flag Workshop',
       logo: {
         alt: 'Code Lab Logo',
         src: 'img/logo.svg',
