@@ -3,7 +3,7 @@ name: Java CI
 on: [push]
 
 jobs:
-  build-guitar-heaven:
+  build-api:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
