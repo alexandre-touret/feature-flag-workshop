@@ -3,16 +3,16 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'My Code Lab',
-  tagline: 'A guided tutorial',
+  title: 'Feature-Flag Workshop',
+  tagline: 'Deep dive into Feature Flagging',
   favicon: 'img/favicon.ico',
 
-  url: 'https://codelab.example.com',
-  baseUrl: '/',
+  url: 'https://blog.touret.info',
+  baseUrl: '/feature-flag-workshop/',
 
   organizationName: 'my-org',
   projectName: 'my-codelab',
-
+  trailingSlash: false,
   onBrokenLinks: 'throw',
 
   i18n: {
