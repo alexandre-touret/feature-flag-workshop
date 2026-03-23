@@ -16,6 +16,8 @@
         <quarkus.platform.version>3.32.4</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <org.mapstruct.version>1.6.3</org.mapstruct.version>
+        <archunit-junit5.version>1.4.1</archunit-junit5.version>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +76,21 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-panache-mock</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.tngtech.archunit</groupId>-->
+<!--            <artifactId>archunit-junit5</artifactId>-->
+<!--            <version>${archunit-junit5.version}</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -89,7 +106,22 @@
                 <version>${compiler-plugin.version}</version>
                 <configuration>
                     <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                        <!-- other annotation processors -->
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
+                        <arg>-Amapstruct.suppressGeneratorVersionInfoComment=true</arg>
+                        <arg>-Amapstruct.verbose=false</arg>
+                        <arg>-Amapstruct.defaultComponentModel=jakarta-cdi</arg>
+                    </compilerArgs>
                 </configuration>
+
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
