@@ -80,6 +80,17 @@ class InstrumentAdapterTest {
     }
 
     @Test
-    void search() {
+    void should_search_succesfully() {
+        assertTrue(instrumentAdapter.search("Nord").size() > 0);
+    }
+
+    @Test
+    void should_search_failed_with_null_query() {
+        assertThrows(NullPointerException.class, () -> instrumentAdapter.search(null));
+    }
+
+    @Test
+    void should_search_ignore_case() {
+        assertEquals(instrumentAdapter.search("Fender").size(), instrumentAdapter.search("fender"));
     }
 }

@@ -74,7 +74,8 @@ public class InstrumentAdapter implements InstrumentPort {
 
     @Override
     public List<Instrument> search(String query) {
-        return List.of();
+        Objects.requireNonNull(query);
+        return instrumentMapper.toInstruments(instrumentRepository.search(query));
     }
 
     @Override

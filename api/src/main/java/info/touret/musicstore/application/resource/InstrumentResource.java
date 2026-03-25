@@ -45,7 +45,7 @@ public class InstrumentResource {
     @POST
     @ResponseStatus(201)
     public Map<String, String> createInstrument(@NotNull InstrumentDto instrumentDto) {
-        if(instrumentDto.id() != null){
+        if (instrumentDto.id() != null) {
             throw new IllegalArgumentException("Instrument id must be null for creation");
         }
         return Map.of("instrumentId", instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto)).reference());
@@ -72,4 +72,13 @@ public class InstrumentResource {
     public void deleteInstrument(@NotNull @RestPath("instrumentId") String instrumentId) {
         instrumentService.deleteInstrument(instrumentService.findById(Long.valueOf(instrumentId)));
     }
+
+    @GET
+    @Path("/search")
+    @Operation
+    @APIResponse(responseCode = "200", description = "Instruments searched successfully")
+    public List<InstrumentDto> search(@NotNull @QueryParam("q") String query) {
+        return instrumentMapper.toInstrumentDtos(instrumentService.search(query));
+    }
+
 }
