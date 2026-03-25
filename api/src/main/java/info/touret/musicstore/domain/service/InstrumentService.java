@@ -6,7 +6,7 @@ import info.touret.musicstore.domain.port.InstrumentPort;
 import java.util.List;
 
 public class InstrumentService {
-    private InstrumentPort instrumentPort;
+    private final InstrumentPort instrumentPort;
 
     public InstrumentService(InstrumentPort instrumentPort) {
         this.instrumentPort = instrumentPort;
@@ -28,7 +28,11 @@ public class InstrumentService {
         instrumentPort.delete(instrument);
     }
 
-    public List<Instrument> search(String query){
+    public List<Instrument> search(String query) {
         return instrumentPort.search(query);
+    }
+
+    public Instrument findById(Long id) {
+        return instrumentPort.findById(id);
     }
 }
