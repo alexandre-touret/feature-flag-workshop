@@ -1,13 +1,10 @@
 package info.touret.musicstore.infrastructure.database.entity;
 
 import info.touret.musicstore.domain.model.InstrumentType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "instruments")
@@ -17,12 +14,17 @@ public class InstrumentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty
     private String name;
+    @NotEmpty
     private String reference;
+    @NotEmpty
     private String manufacturer;
+    @Min(0)
     private Double price;
     private String description;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private InstrumentType type;
 

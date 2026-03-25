@@ -12,7 +12,7 @@ public interface InstrumentPort {
 
     Instrument update(Instrument instrument);
 
-    void delete(Instrument instrument);
+    boolean delete(Instrument instrument);
 
     List<Instrument> search(String query);
 

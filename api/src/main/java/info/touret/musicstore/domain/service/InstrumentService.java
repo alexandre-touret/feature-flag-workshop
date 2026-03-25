@@ -24,8 +24,8 @@ public class InstrumentService {
         return instrumentPort.update(instrument);
     }
 
-    public void deleteInstrument(Instrument instrument) {
-        instrumentPort.delete(instrument);
+    public boolean deleteInstrument(Instrument instrument) {
+        return instrumentPort.delete(instrument);
     }
 
     public List<Instrument> search(String query) {
