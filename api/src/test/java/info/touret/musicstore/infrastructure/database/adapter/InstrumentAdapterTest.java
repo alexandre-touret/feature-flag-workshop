@@ -91,6 +91,6 @@ class InstrumentAdapterTest {
 
     @Test
     void should_search_ignore_case() {
-        assertEquals(instrumentAdapter.search("Fender").size(), instrumentAdapter.search("fender"));
+        assertEquals(instrumentAdapter.search("Fender").size(), instrumentAdapter.search("fender").size());
     }
 }
