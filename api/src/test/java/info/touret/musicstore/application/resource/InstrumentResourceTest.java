@@ -72,7 +72,7 @@ class InstrumentResourceTest {
 
     @Order(5)
     @Test
-    void should_fail_updating_an_invalid_instrument(){
+    void should_fail_updating_an_invalid_instrument() {
         var instrumentToBeDeleted = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
@@ -83,18 +83,41 @@ class InstrumentResourceTest {
                 .then()
                 .statusCode(400);
     }
+
     @Order(6)
     @Test
-    void should_fail_updating_a_missing_instrument(){
-        var instrumentToBeDeleted = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+    void should_fail_updating_a_missing_instrument() {
+        var instrumentToBeUpdated = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
                 .and()
-                .body(instrumentToBeDeleted)
+                .body(instrumentToBeUpdated)
                 .when()
                 .put("/instruments/300")
                 .then()
                 .statusCode(400);
+    }
+
+
+    @Order(7)
+    @Test
+    void should_fail_deleting_a_missing_instrument() {
+        var instrumentToBeDeleted = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .when()
+                .delete("/instruments/300")
+                .then()
+                .statusCode(404);
+    }
+
+
+    @Test
+    void should_search_successfully() {
+        RestAssured.given().get("/instruments/search?q=Fender")
+                .then()
+                .statusCode(200)
+                .assertThat().body("isEmpty()", Is.is(false));
     }
 }
 

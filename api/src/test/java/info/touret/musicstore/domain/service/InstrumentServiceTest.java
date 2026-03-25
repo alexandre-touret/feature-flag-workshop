@@ -27,10 +27,6 @@ class InstrumentServiceTest {
         gibsones335 = new Instrument(1L, "Gibson ES 335", "ES 355", "Gibson", 2444D, "Chuck Berry's Guitar", InstrumentType.GUITAR);
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void should_find_successfully() {
         when(instrumentPort.findAll()).thenReturn(List.of(gibsones335));
