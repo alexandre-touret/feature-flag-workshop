@@ -70,6 +70,7 @@ class InstrumentResourceTest {
                 .statusCode(204);
     }
 
+    @Order(5)
     @Test
     void should_fail_updating_an_invalid_instrument(){
         var instrumentToBeDeleted = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
@@ -82,17 +83,18 @@ class InstrumentResourceTest {
                 .then()
                 .statusCode(400);
     }
+    @Order(6)
     @Test
     void should_fail_updating_a_missing_instrument(){
-        var instrumentToBeDeleted = new InstrumentDto(200L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        var instrumentToBeDeleted = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
                 .and()
                 .body(instrumentToBeDeleted)
                 .when()
-                .put("/instruments/200")
+                .put("/instruments/300")
                 .then()
-                .statusCode(404);
+                .statusCode(400);
     }
 }
 

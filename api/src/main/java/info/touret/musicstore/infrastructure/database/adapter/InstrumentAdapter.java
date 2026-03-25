@@ -1,14 +1,17 @@
 package info.touret.musicstore.infrastructure.database.adapter;
 
-import info.touret.musicstore.domain.exception.EntityNotFoundException;
+import info.touret.musicstore.domain.exception.DataNotFoundException;
+import info.touret.musicstore.domain.exception.InvalidDataException;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.port.InstrumentPort;
 import info.touret.musicstore.infrastructure.database.entity.InstrumentEntity;
 import info.touret.musicstore.infrastructure.database.mapper.InstrumentMapper;
 import info.touret.musicstore.infrastructure.database.repository.InstrumentRepository;
+import io.quarkus.arc.ArcUndeclaredThrowableException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +41,7 @@ public class InstrumentAdapter implements InstrumentPort {
         Objects.requireNonNull(instrument);
         InstrumentEntity instrumentToBeCreated = instrumentMapper.toInstrumentEntity(instrument);
         instrumentRepository.persist(instrumentToBeCreated);
+        instrumentRepository.flush();
         return instrumentMapper.toinstrument(instrumentToBeCreated);
     }
 
@@ -45,14 +49,27 @@ public class InstrumentAdapter implements InstrumentPort {
     @Override
     public Instrument update(Instrument instrument) {
         Objects.requireNonNull(instrument);
-        return instrumentMapper.toinstrument(instrumentRepository.getEntityManager().merge(instrumentMapper.toInstrumentEntity(instrument)));
+        try {
+            InstrumentEntity merged = instrumentRepository.getEntityManager().merge(instrumentMapper.toInstrumentEntity(instrument));
+            instrumentRepository.flush();
+            return instrumentMapper.toinstrument(merged);
+        } catch (ConstraintViolationException e) {
+            throw e;
+        } catch (ArcUndeclaredThrowableException e) {
+            if (e.getCause() instanceof ConstraintViolationException cve) {
+                throw cve;
+            }
+            throw new InvalidDataException(e);
+        } catch (Exception e) {
+            throw new InvalidDataException(e);
+        }
     }
 
     @Transactional
     @Override
-    public void delete(Instrument instrument) {
+    public boolean delete(Instrument instrument) {
         Objects.requireNonNull(instrument.id());
-        instrumentRepository.deleteById(instrument.id());
+        return instrumentRepository.deleteById(instrument.id());
     }
 
     @Override
@@ -63,6 +80,6 @@ public class InstrumentAdapter implements InstrumentPort {
     @Override
     public Instrument findById(Long id) {
         Objects.requireNonNull(id, String.format("Instrument {} not found", id));
-        return Optional.ofNullable(instrumentMapper.toinstrument(instrumentRepository.findById(id))).orElseThrow(() -> new EntityNotFoundException(String.format("Instrument {} not found", id)));
+        return Optional.ofNullable(instrumentMapper.toinstrument(instrumentRepository.findById(id))).orElseThrow(() -> new DataNotFoundException(String.format("Instrument {} not found", id)));
     }
 }
