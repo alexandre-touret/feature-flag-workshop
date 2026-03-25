@@ -39,6 +39,10 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm</artifactId>
         </dependency>
         <dependency>
@@ -86,11 +90,11 @@
             <artifactId>mapstruct</artifactId>
             <version>${org.mapstruct.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.tngtech.archunit</groupId>-->
-<!--            <artifactId>archunit-junit5</artifactId>-->
-<!--            <version>${archunit-junit5.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>${archunit-junit5.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,5 +1,6 @@
 package info.touret.musicstore.infrastructure.database.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -8,6 +9,7 @@ public class AddressEntity {
     private String number;
     private String street;
     private String city;
+    @Column(name = "zip_code")
     private String zipCode;
     private String country;
 

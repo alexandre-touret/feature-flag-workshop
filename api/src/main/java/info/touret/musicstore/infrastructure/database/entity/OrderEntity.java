@@ -1,15 +1,6 @@
 package info.touret.musicstore.infrastructure.database.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -24,6 +15,7 @@ public class OrderEntity {
     private Long id;
 
     private UUID reference;
+    @Column(name = "order_date")
     private ZonedDateTime orderDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -38,15 +30,19 @@ public class OrderEntity {
     )
     private List<InstrumentEntity> instruments;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatusEntity orderStatusEntity;
+
     public OrderEntity() {
     }
 
-    public OrderEntity(Long id, UUID reference, ZonedDateTime orderDate, CustomerEntity customer, List<InstrumentEntity> instruments) {
+    public OrderEntity(Long id, UUID reference, ZonedDateTime orderDate, CustomerEntity customer, List<InstrumentEntity> instruments, OrderStatusEntity orderStatusEntity) {
         this.id = id;
         this.reference = reference;
         this.orderDate = orderDate;
         this.customer = customer;
         this.instruments = instruments;
+        this.orderStatusEntity = orderStatusEntity;
     }
 
     public Long getId() {
@@ -87,5 +83,13 @@ public class OrderEntity {
 
     public void setInstruments(List<InstrumentEntity> instruments) {
         this.instruments = instruments;
+    }
+
+    public OrderStatusEntity getOrderStatusEntity() {
+        return orderStatusEntity;
+    }
+
+    public void setOrderStatusEntity(OrderStatusEntity orderStatusEntity) {
+        this.orderStatusEntity = orderStatusEntity;
     }
 }

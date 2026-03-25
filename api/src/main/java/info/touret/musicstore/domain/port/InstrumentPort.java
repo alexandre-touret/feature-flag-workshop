@@ -15,4 +15,6 @@ public interface InstrumentPort {
     void delete(Instrument instrument);
 
     List<Instrument> search(String query);
+
+    Instrument findById(Long id);
 }
