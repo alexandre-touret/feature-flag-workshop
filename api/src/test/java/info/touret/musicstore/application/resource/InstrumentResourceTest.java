@@ -119,6 +119,12 @@ class InstrumentResourceTest {
                 .statusCode(200)
                 .assertThat().body("isEmpty()", Is.is(false));
     }
+
+    @Test
+    void should_fail_searching() {
+        RestAssured.given().get("/instruments/search?q=")
+                .then()
+                .statusCode(400)
+                .assertThat().body("isEmpty()", Is.is(false));
+    }
 }
-
-
