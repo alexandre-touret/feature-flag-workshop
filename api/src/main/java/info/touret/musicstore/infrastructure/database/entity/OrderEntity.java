@@ -1,6 +1,7 @@
 package info.touret.musicstore.infrastructure.database.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -8,17 +9,21 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
+@NamedQueries({
+        @NamedQuery(name = "OrderEntity.search", query = "from OrderEntity where cast(reference as String) LIKE concat('%',?1,'%') OR lower(customer.firstname) LIKE lower(concat('%',?1,'%')) OR lower(customer.lastname) LIKE lower(concat('%',?1,'%'))")})
+
 public class OrderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private UUID reference;
     @Column(name = "order_date")
     private ZonedDateTime orderDate;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "customer_id")
     private CustomerEntity customer;
 
@@ -30,19 +35,20 @@ public class OrderEntity {
     )
     private List<InstrumentEntity> instruments;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    private OrderStatusEntity orderStatusEntity;
+    private OrderStatusEntity orderStatus;
 
     public OrderEntity() {
     }
 
-    public OrderEntity(Long id, UUID reference, ZonedDateTime orderDate, CustomerEntity customer, List<InstrumentEntity> instruments, OrderStatusEntity orderStatusEntity) {
+    public OrderEntity(Long id, UUID reference, ZonedDateTime orderDate, CustomerEntity customer, List<InstrumentEntity> instruments, OrderStatusEntity orderStatus) {
         this.id = id;
         this.reference = reference;
         this.orderDate = orderDate;
         this.customer = customer;
         this.instruments = instruments;
-        this.orderStatusEntity = orderStatusEntity;
+        this.orderStatus = orderStatus;
     }
 
     public Long getId() {
@@ -85,11 +91,11 @@ public class OrderEntity {
         this.instruments = instruments;
     }
 
-    public OrderStatusEntity getOrderStatusEntity() {
-        return orderStatusEntity;
+    public OrderStatusEntity getOrderStatus() {
+        return orderStatus;
     }
 
-    public void setOrderStatusEntity(OrderStatusEntity orderStatusEntity) {
-        this.orderStatusEntity = orderStatusEntity;
+    public void setOrderStatus(OrderStatusEntity orderStatusEntity) {
+        this.orderStatus = orderStatusEntity;
     }
 }

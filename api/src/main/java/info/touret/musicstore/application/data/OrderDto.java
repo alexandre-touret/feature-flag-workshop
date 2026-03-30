@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonRootName("Order")
-public record OrderDto(@NotNull List<InstrumentDto> instruments, @Min(0L) Long orderId,
+public record OrderDto(@NotNull List<InstrumentDto> instruments, @Min(0L) Long id,
                        @org.hibernate.validator.constraints.UUID UUID reference, @NotNull ZonedDateTime orderDate,
                        @NotNull CustomerDto customer, OrderStatusDto orderStatus) {
 }

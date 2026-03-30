@@ -32,4 +32,8 @@ public class OrderService {
     public List<Order> search(String query) {
         return orderPort.search(query);
     }
+
+    public Order findById(Long id) {
+        return orderPort.findById(id);
+    }
 }
