@@ -7,8 +7,15 @@ import java.util.List;
 public interface OrderPort {
 
     List<Order> findAll();
+
     Order create(Order order);
+
     Order update(Order order);
-    void delete(Order order);
+
+    boolean delete(Order order);
+
     List<Order> search(String query);
+
+    Order findById(Long id);
+
 }
