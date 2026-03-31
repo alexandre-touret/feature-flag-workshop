@@ -184,4 +184,132 @@ class OrderResourceTest {
             .statusCode(400);
     }
 
+    /// Test 10: Modify an existing instrument in an order.
+    /// Changes the name and price of an instrument within order 10.
+    @Order(10)
+    @Test
+    void should_modify_instrument_in_order_successfully() {
+        var modifiedInstrument = new InstrumentDto(10L, "Firebird Modified", "GIB-FIR-01", "Gibson", 2500.0, "Modified description", InstrumentTypeDto.GUITAR);
+        var originalInstrument60 = new InstrumentDto(60L, "Rhoads RRX24", "JAC-RHO-01", "Jackson", 800.0, "Rhoads Electric", InstrumentTypeDto.GUITAR);
+
+        var orderToUpdate = new OrderDto(
+                List.of(modifiedInstrument, originalInstrument60),
+                10L,
+                UUID.fromString("a0000000-0000-0000-0000-000000000010"),
+                ZonedDateTime.now(),
+                new CustomerDto(10L, "Judy", "Martinez", "judy@test.com", addressDto),
+                OrderStatusDto.CREATED
+        );
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(orderToUpdate)
+                .when()
+                .put("/orders/10")
+                .then()
+                .statusCode(200)
+                .assertThat().body("instruments[0].name", Is.is("Firebird Modified"))
+                .assertThat().body("instruments[0].price", Is.is(2500.0f));
+    }
+
+    /// Test 11: Add a new instrument to an existing order.
+    /// Adds instrument 1 to order 10's instrument list.
+    @Order(11)
+    @Test
+    void should_add_instrument_to_order_successfully() {
+        var inst1 = new InstrumentDto(1L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        var inst10 = new InstrumentDto(10L, "Firebird Modified", "GIB-FIR-01", "Gibson", 2500.0, "Modified description", InstrumentTypeDto.GUITAR);
+        var inst60 = new InstrumentDto(60L, "Rhoads RRX24", "JAC-RHO-01", "Jackson", 800.0, "Rhoads Electric", InstrumentTypeDto.GUITAR);
+
+        var orderToUpdate = new OrderDto(
+                List.of(inst1, inst10, inst60),
+                10L,
+                UUID.fromString("a0000000-0000-0000-0000-000000000010"),
+                ZonedDateTime.now(),
+                new CustomerDto(10L, "Judy", "Martinez", "judy@test.com", addressDto),
+                OrderStatusDto.CREATED
+        );
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(orderToUpdate)
+                .when()
+                .put("/orders/10")
+                .then()
+                .statusCode(200)
+                .assertThat().body("instruments.size()", Is.is(3));
+    }
+
+    /// Test 12: Modify customer details in an order.
+    /// Updates the customer's lastname and email for order 10.
+    @Order(12)
+    @Test
+    void should_modify_customer_in_order_successfully() {
+        var modifiedCustomer = new CustomerDto(10L, "Judy", "Updated", "judy.updated@test.com", addressDto);
+        var inst1 = new InstrumentDto(1L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+
+        var orderToUpdate = new OrderDto(
+                List.of(inst1),
+                10L,
+                UUID.fromString("a0000000-0000-0000-0000-000000000010"),
+                ZonedDateTime.now(),
+                modifiedCustomer,
+                OrderStatusDto.CREATED
+        );
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(orderToUpdate)
+                .when()
+                .put("/orders/10")
+                .then()
+                .statusCode(200)
+                .assertThat().body("customer.lastname", Is.is("Updated"))
+                .assertThat().body("customer.email", Is.is("judy.updated@test.com"));
+    }
+
+    /// Test 13: Fail when order data is invalid (empty or null fields).
+    /// Expects 400 Bad Request due to validation constraints.
+    @Order(13)
+    @Test
+    void should_fail_when_order_data_is_invalid() {
+        // Case 1: Empty customer firstname
+        var invalidCustomer = new CustomerDto(10L, "", "Martinez", "judy@test.com", addressDto);
+        var inst1 = new InstrumentDto(1L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+
+        var invalidOrder = new OrderDto(
+                List.of(inst1),
+                10L,
+                UUID.fromString("a0000000-0000-0000-0000-000000000010"),
+                ZonedDateTime.now(),
+                invalidCustomer,
+                OrderStatusDto.CREATED
+        );
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(invalidOrder)
+                .when()
+                .put("/orders/10")
+                .then()
+                .statusCode(400);
+
+        // Case 2: Null customer
+        var nullCustomerOrder = new OrderDto(
+                List.of(inst1),
+                10L,
+                UUID.fromString("a0000000-0000-0000-0000-000000000010"),
+                ZonedDateTime.now(),
+                null,
+                OrderStatusDto.CREATED
+        );
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(nullCustomerOrder)
+                .when()
+                .put("/orders/10")
+                .then()
+                .statusCode(400);
+    }
 }

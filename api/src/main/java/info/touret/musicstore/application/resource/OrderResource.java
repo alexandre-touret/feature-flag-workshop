@@ -4,6 +4,7 @@ import info.touret.musicstore.application.data.OrderDto;
 import info.touret.musicstore.application.mapper.OrderMapper;
 import info.touret.musicstore.domain.service.OrderService;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -78,7 +79,7 @@ public class OrderResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @ResponseStatus(201)
-    public Map<String, String> createOrder(@NotNull OrderDto orderDto) {
+    public Map<String, String> createOrder(@NotNull @Valid OrderDto orderDto) {
         return Map.of("id", orderService.createOrder(orderMapper.toOrder(orderDto)).reference().toString());
     }
 
@@ -100,9 +101,9 @@ public class OrderResource {
     @PUT
     @Path("/{id}")
     public OrderDto updateOrder(@NotNull @RestPath("id") Long id,
-                                @NotNull @RequestBody(required = true,
-                                        content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                                                schema = @Schema(implementation = OrderDto.class))) OrderDto orderDto) {
+                                 @NotNull @Valid @RequestBody(required = true,
+                                         content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                                                 schema = @Schema(implementation = OrderDto.class))) OrderDto orderDto) {
         if (!orderDto.id().equals(id)) {
             throw new IllegalArgumentException(String.format("Order id %s does not match %s", id, orderDto.id()));
         }
