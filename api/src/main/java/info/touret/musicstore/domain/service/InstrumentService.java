@@ -1,6 +1,8 @@
 package info.touret.musicstore.domain.service;
 
+import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Instrument;
+import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.port.InstrumentPort;
 
 import java.util.List;
@@ -12,27 +14,33 @@ public class InstrumentService {
         this.instrumentPort = instrumentPort;
     }
 
-    public List<Instrument> findInstruments() {
+    public Result<List<Instrument>> findInstruments() {
         return instrumentPort.findAll();
     }
 
-    public Instrument createInstrument(Instrument instrument) {
+    public Result<Instrument> createInstrument(Instrument instrument) {
+        if (instrument.id() != null) {
+            return Result.failure(new DomainError.InvalidData("Instrument id must be null for creation"));
+        }
         return instrumentPort.create(instrument);
     }
 
-    public Instrument updateInstrument(Instrument instrument) {
+    public Result<Instrument> updateInstrument(Instrument instrument) {
+        if (instrument.id() == null) {
+            return Result.failure(new DomainError.InvalidData("Instrument id must not be null for update"));
+        }
         return instrumentPort.update(instrument);
     }
 
-    public boolean deleteInstrument(Instrument instrument) {
+    public Result<Boolean> deleteInstrument(Instrument instrument) {
         return instrumentPort.delete(instrument);
     }
 
-    public List<Instrument> search(String query) {
+    public Result<List<Instrument>> search(String query) {
         return instrumentPort.search(query);
     }
 
-    public Instrument findById(Long id) {
+    public Result<Instrument> findById(Long id) {
         return instrumentPort.findById(id);
     }
 }

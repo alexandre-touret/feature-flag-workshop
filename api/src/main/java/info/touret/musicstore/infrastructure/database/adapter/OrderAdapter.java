@@ -1,18 +1,19 @@
 package info.touret.musicstore.infrastructure.database.adapter;
 
-import info.touret.musicstore.domain.exception.DataNotFoundException;
-import info.touret.musicstore.domain.exception.InvalidDataException;
+import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Order;
+import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.port.OrderPort;
 import info.touret.musicstore.infrastructure.database.entity.OrderEntity;
 import info.touret.musicstore.infrastructure.database.mapper.OrderMapper;
 import info.touret.musicstore.infrastructure.database.repository.CustomerRepository;
 import info.touret.musicstore.infrastructure.database.repository.OrderRepository;
-import io.quarkus.arc.ArcUndeclaredThrowableException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class OrderAdapter implements OrderPort {
-
+    private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OrderAdapter.class);
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CustomerRepository customerRepository;
@@ -33,58 +34,71 @@ public class OrderAdapter implements OrderPort {
     }
 
     @Override
-    public List<Order> findAll() {
-        return orderMapper.toOrders(orderRepository.listAll());
+    public Result<List<Order>> findAll() {
+        return Result.success(orderMapper.toOrders(orderRepository.listAll()));
     }
 
     @Transactional
     @Override
-    public Order create(Order order) {
-        Objects.requireNonNull(order);
-        OrderEntity orderToBeCreated = orderMapper.toOrderEntity(order);
-        if (orderToBeCreated.getCustomer() != null && orderToBeCreated.getCustomer().getId() != null && orderToBeCreated.getCustomer().getId() > 0L) {
-            orderToBeCreated.setCustomer(customerRepository.findById(orderToBeCreated.getCustomer().getId()));
-        }
-        orderRepository.persistAndFlush(orderToBeCreated);
-        return orderMapper.toOrder(orderToBeCreated);
-    }
-
-    @Transactional
-    @Override
-    public Order update(Order order) {
+    public Result<Order> create(Order order) {
         try {
+            Objects.requireNonNull(order);
+            OrderEntity orderToBeCreated = orderMapper.toOrderEntity(order);
+            if (orderToBeCreated.getCustomer() != null && orderToBeCreated.getCustomer().getId() != null && orderToBeCreated.getCustomer().getId() > 0L) {
+                orderToBeCreated.setCustomer(customerRepository.findById(orderToBeCreated.getCustomer().getId()));
+            }
+            LOGGER.info("Creating order: {}" , order);
+            orderRepository.persistAndFlush(orderToBeCreated);
+            return Result.success(orderMapper.toOrder(orderToBeCreated));
+        } catch (PersistenceException | ConstraintViolationException e) {
+            LOGGER.error("Order creation failed: {}" , order, e);
+            return Result.failure(new DomainError.InvalidData(e.getMessage()));
+        }
+    }
+
+    @Transactional
+    @Override
+    public Result<Order> update(Order order) {
+        try {
+            LOGGER.info("Updating order: {}" , order);
             OrderEntity merged = orderRepository.getEntityManager().merge(orderMapper.toOrderEntity(order));
             orderRepository.flush();
-            return orderMapper.toOrder(merged);
-        } catch (ConstraintViolationException e) {
-            throw e;
-        } catch (ArcUndeclaredThrowableException e) {
-            if (e.getCause() instanceof ConstraintViolationException cve) {
-                throw cve;
-            }
-            throw new InvalidDataException(e);
-        } catch (Exception e) {
-            throw new InvalidDataException(e);
+            return Result.success(orderMapper.toOrder(merged));
+        } catch (PersistenceException | ConstraintViolationException e) {
+            LOGGER.error("Order update failed: {}" , order, e);
+            return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }
 
     @Transactional
     @Override
-    public List<Order> search(String query) {
+    public Result<List<Order>> search(String query) {
         Objects.requireNonNull(query);
-        return orderMapper.toOrders(orderRepository.search(query));
+        return Result.success(orderMapper.toOrders(orderRepository.search(query)));
     }
 
     @Override
-    public Order findById(Long id) {
-        Objects.requireNonNull(id, String.format("Order {} not found", id));
-        return Optional.ofNullable(orderMapper.toOrder(orderRepository.findById(id))).orElseThrow(() -> new DataNotFoundException(String.format("Order {} not found", id)));
+    public Result<Order> findById(Long id) {
+        return Optional.ofNullable(orderMapper.toOrder(orderRepository.findById(id)))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure(new DomainError.DataNotFound(String.format("Order %d not found", id))));
     }
 
     @Transactional
     @Override
-    public boolean delete(Order order) {
-        Objects.requireNonNull(order.id());
-        return orderRepository.deleteById(order.id());
+    public Result<Boolean> delete(Order order) {
+        try {
+            Objects.requireNonNull(order.id());
+            var isDeleted = orderRepository.deleteById(order.id());
+            if (isDeleted) {
+                return Result.success(isDeleted);
+            } else {
+                LOGGER.error("Order deletion failed: {}" , order);
+                return Result.failure(new DomainError.DataNotFound(String.format("Order %d not found", order.id())));
+            }
+        } catch (NullPointerException | PersistenceException e) {
+            LOGGER.error("Order update failed: {}" , order, e);
+            return Result.failure(new DomainError.InvalidData(e.getMessage()));
+        }
     }
 }
