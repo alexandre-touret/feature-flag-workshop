@@ -1,27 +1,35 @@
 package info.touret.musicstore.domain.service;
 
+import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Order;
+import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.port.OrderPort;
 
 import java.util.List;
 
 public class OrderService {
 
-    private OrderPort orderPort;
+    private final OrderPort orderPort;
 
     public OrderService(OrderPort orderPort) {
         this.orderPort = orderPort;
     }
 
-    public List<Order> findOrders() {
+    public Result<List<Order>> findOrders() {
         return orderPort.findAll();
     }
 
-    public Order createOrder(Order order) {
+    public Result<Order> createOrder(Order order) {
+        if (order.id() != null) {
+            return Result.failure(new DomainError.InvalidData("Order id must be null for creation"));
+        }
         return orderPort.create(order);
     }
 
-    public Order updateOrder(Order order) {
+    public Result<Order> updateOrder(Order order) {
+        if (order.id() == null) {
+            return Result.failure(new DomainError.InvalidData("Order id must not be null for update"));
+        }
         return orderPort.update(order);
     }
 
@@ -29,11 +37,11 @@ public class OrderService {
         orderPort.delete(order);
     }
 
-    public List<Order> search(String query) {
+    public Result<List<Order>> search(String query) {
         return orderPort.search(query);
     }
 
-    public Order findById(Long id) {
+    public Result<Order> findById(Long id) {
         return orderPort.findById(id);
     }
 }

@@ -2,17 +2,21 @@ package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.InstrumentDto;
 import info.touret.musicstore.application.mapper.InstrumentMapper;
+import info.touret.musicstore.domain.model.DomainError;
+import info.touret.musicstore.domain.model.Instrument;
+import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.InstrumentService;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
 import java.util.List;
@@ -34,51 +38,88 @@ public class InstrumentResource {
     @APIResponse(responseCode = "200", description = "Instruments retrieved successfully")
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
-    public List<InstrumentDto> retrieveInstruments() {
-        return instrumentMapper.toInstrumentDtos(instrumentService.findInstruments());
+    @RunOnVirtualThread
+    public Response retrieveInstruments() {
+        var result = instrumentService.findInstruments();
+        return handleResult(result, 200);
     }
 
 
     @Operation
-    @APIResponse(responseCode = "200", description = "Instrument created successfully")
+    @APIResponse(responseCode = "201", description = "Instrument created successfully")
+    @APIResponse(responseCode = "400", description = "Invalid data")
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
-    @ResponseStatus(201)
-    public Map<String, String> createInstrument(@NotNull InstrumentDto instrumentDto) {
-        if (instrumentDto.id() != null) {
-            throw new IllegalArgumentException("Instrument id must be null for creation");
-        }
-        return Map.of("instrumentId", instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto)).reference());
+    @RunOnVirtualThread
+    public Response createInstrument(@NotNull InstrumentDto instrumentDto) {
+        var result = instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto));
+        return handleResult(result, 201);
     }
 
     @Operation
     @APIResponse(responseCode = "200", description = "Instrument updated successfully")
+    @APIResponse(responseCode = "404", description = "Instrument not found")
     @PUT
     @Path("/{instrumentId}")
-    public InstrumentDto updateInstrument(@NotNull @RestPath("instrumentId") Long instrumentId,
-                                          @NotNull @RequestBody(required = true,
-                                                  content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                                                          schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
-        if (!instrumentDto.id().equals(instrumentId)) {
-            throw new IllegalArgumentException(String.format("Instrument id %s does not match %s", instrumentId, instrumentDto.id()));
+    @RunOnVirtualThread
+    public Response updateInstrument(@NotNull @RestPath("instrumentId") Long instrumentId,
+                                     @NotNull @RequestBody(required = true,
+                                             content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                                                     schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
+        if (!instrumentId.equals(instrumentDto.id())) {
+            return Response.status(400).entity("Instrument id does not match").build();
         }
-        return instrumentMapper.toInstrumentDto(instrumentService.updateInstrument(instrumentMapper.toInstrument(instrumentDto)));
+        var result = instrumentService.updateInstrument(instrumentMapper.toInstrument(instrumentDto));
+        return handleResult(result, 200);
     }
 
     @Operation
-    @APIResponse(responseCode = "200", description = "Instrument deleted successfully")
+    @APIResponse(responseCode = "204", description = "Instrument deleted successfully")
     @DELETE
     @Path("/{instrumentId}")
-    public void deleteInstrument(@NotNull @RestPath("instrumentId") String instrumentId) {
-        instrumentService.deleteInstrument(instrumentService.findById(Long.valueOf(instrumentId)));
+    @RunOnVirtualThread
+    public Response deleteInstrument(@NotNull @RestPath("instrumentId") String instrumentId) {
+        var result = instrumentService.findById(Long.valueOf(instrumentId));
+        if (result.isFailure()) {
+            return toErrorResponse(result.error());
+        }
+        instrumentService.deleteInstrument(result.value());
+        return Response.noContent().build();
     }
 
     @GET
     @Path("/search")
     @Operation
     @APIResponse(responseCode = "200", description = "Instruments searched successfully")
-    public List<InstrumentDto> search(@NotNull @QueryParam("q") String query) {
-        return instrumentMapper.toInstrumentDtos(instrumentService.search(query));
+    @RunOnVirtualThread
+    public Response search(@NotNull @QueryParam("q") String query) {
+        return handleResult(Result.success(instrumentService.search(query).value()), 200);
     }
 
+    @SuppressWarnings("unchecked")
+    private Response handleResult(Result<?> result, int successStatus) {
+        if (result.isSuccess()) {
+            Object responseBody = result.value();
+            if (responseBody instanceof Instrument instrument && successStatus == 201) {
+                return Response.status(201).entity(Map.of("instrumentId", instrument.reference())).build();
+            }
+            if (responseBody instanceof Instrument instrument) {
+                return Response.status(successStatus).entity(instrumentMapper.toInstrumentDto(instrument)).build();
+            }
+            if(responseBody instanceof List<?> list){
+                return Response.status(successStatus).entity(instrumentMapper.toInstrumentDtos((List<Instrument>) list)).build();
+            }
+
+            return Response.status(successStatus).entity(responseBody).build();
+        }
+        return toErrorResponse(result.error());
+    }
+
+    private Response toErrorResponse(DomainError error) {
+        return switch (error) {
+            case DomainError.DataNotFound e -> Response.status(404).entity(e.message()).build();
+            case DomainError.InvalidData e -> Response.status(400).entity(e.message()).build();
+            case DomainError.Conflict e -> Response.status(409).entity(e.message()).build();
+        };
+    }
 }

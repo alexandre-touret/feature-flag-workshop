@@ -1,20 +1,21 @@
 package info.touret.musicstore.domain.port;
 
 import info.touret.musicstore.domain.model.Instrument;
+import info.touret.musicstore.domain.model.Result;
 
 import java.util.List;
 
 public interface InstrumentPort {
 
-    List<Instrument> findAll();
+    Result<List<Instrument>> findAll();
 
-    Instrument create(Instrument instrument);
+    Result<Instrument> create(Instrument instrument);
 
-    Instrument update(Instrument instrument);
+    Result<Instrument> update(Instrument instrument);
 
-    boolean delete(Instrument instrument);
+    Result<Boolean> delete(Instrument instrument);
 
-    List<Instrument> search(String query);
+    Result<List<Instrument>> search(String query);
 
-    Instrument findById(Long id);
+    Result<Instrument> findById(Long id);
 }
