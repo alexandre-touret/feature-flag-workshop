@@ -29,7 +29,7 @@ class OrderResourceTest {
         // Setup test data matching the import.sql test data
         addressDto = new AddressDto("10", "Rue de Paris", "Paris", "75001", "France");
         customerDto = new CustomerDto(null, "Alice", "Smith", "alice@test.com", addressDto);
-        instrumentDto = new InstrumentDto(1L, "Stratocaster", "FEN-STR-01", "Fender", 1200D, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        instrumentDto = new InstrumentDto(null, "Stratocaster", "FEN-STR-01", "Fender", 1200D, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         
         orderDto = new OrderDto(
             List.of(instrumentDto),
