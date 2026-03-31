@@ -6,6 +6,7 @@ import info.touret.musicstore.domain.model.Order;
 import info.touret.musicstore.domain.port.OrderPort;
 import info.touret.musicstore.infrastructure.database.entity.OrderEntity;
 import info.touret.musicstore.infrastructure.database.mapper.OrderMapper;
+import info.touret.musicstore.infrastructure.database.repository.CustomerRepository;
 import info.touret.musicstore.infrastructure.database.repository.OrderRepository;
 import io.quarkus.arc.ArcUndeclaredThrowableException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,11 +23,13 @@ public class OrderAdapter implements OrderPort {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final CustomerRepository customerRepository;
 
     @Inject
-    public OrderAdapter(OrderRepository orderRepository, OrderMapper orderMapper) {
+    public OrderAdapter(OrderRepository orderRepository, OrderMapper orderMapper, CustomerRepository customerRepository) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -39,8 +42,10 @@ public class OrderAdapter implements OrderPort {
     public Order create(Order order) {
         Objects.requireNonNull(order);
         OrderEntity orderToBeCreated = orderMapper.toOrderEntity(order);
-        orderRepository.persist(orderToBeCreated);
-        orderRepository.flush();
+        if (orderToBeCreated.getCustomer() != null && orderToBeCreated.getCustomer().getId() != null && orderToBeCreated.getCustomer().getId() > 0L) {
+            orderToBeCreated.setCustomer(customerRepository.findById(orderToBeCreated.getCustomer().getId()));
+        }
+        orderRepository.persistAndFlush(orderToBeCreated);
         return orderMapper.toOrder(orderToBeCreated);
     }
 

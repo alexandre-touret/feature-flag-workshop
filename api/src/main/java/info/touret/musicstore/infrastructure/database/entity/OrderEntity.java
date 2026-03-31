@@ -7,6 +7,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static jakarta.persistence.CascadeType.*;
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Table(name = "orders")
 @NamedQueries({
@@ -23,11 +26,11 @@ public class OrderEntity {
     @Column(name = "order_date")
     private ZonedDateTime orderDate;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {DETACH, MERGE, PERSIST, REFRESH})
     @JoinColumn(name = "customer_id")
     private CustomerEntity customer;
 
-    @ManyToMany
+    @ManyToMany(cascade = ALL)
     @JoinTable(
             name = "order_instruments",
             joinColumns = @JoinColumn(name = "order_id"),
