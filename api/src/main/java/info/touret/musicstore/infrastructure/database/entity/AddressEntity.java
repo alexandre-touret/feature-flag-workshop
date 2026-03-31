@@ -2,15 +2,21 @@ package info.touret.musicstore.infrastructure.database.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotEmpty;
 
 @Embeddable
 public class AddressEntity {
 
+    @NotEmpty
     private String number;
+    @NotEmpty
     private String street;
+    @NotEmpty
     private String city;
+    @NotEmpty
     @Column(name = "zip_code")
     private String zipCode;
+    @NotEmpty
     private String country;
 
     public AddressEntity() {
