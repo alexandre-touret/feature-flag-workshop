@@ -2,7 +2,6 @@ package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.InstrumentDto;
 import info.touret.musicstore.application.mapper.InstrumentMapper;
-import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.InstrumentService;
@@ -13,6 +12,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -39,7 +39,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     }
 
     @Operation(summary = "Retrieve all instruments", description = "Retrieve all instruments")
-    @APIResponse(responseCode = "200", description = "Instruments retrieved successfully")
+    @APIResponse(responseCode = "200", description = "Instruments retrieved successfully",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
@@ -50,8 +51,10 @@ public class InstrumentResource extends AbstractMusicStoreResource{
 
 
     @Operation
-    @APIResponse(responseCode = "201", description = "Instrument created successfully")
-    @APIResponse(responseCode = "400", description = "Invalid data")
+    @APIResponse(responseCode = "201", description = "Instrument created successfully",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class)))
+    @APIResponse(responseCode = "400", description = "Invalid data",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
@@ -61,13 +64,15 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     }
 
     @Operation
-    @APIResponse(responseCode = "200", description = "Instrument updated successfully")
-    @APIResponse(responseCode = "404", description = "Instrument not found")
+    @APIResponse(responseCode = "200", description = "Instrument updated successfully",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class)))
+    @APIResponse(responseCode = "404", description = "Instrument not found",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
     @PUT
     @Path("/{instrumentId}")
     @RunOnVirtualThread
     public Response updateInstrument(@NotNull @RestPath("instrumentId") Long instrumentId,
-                                     @NotNull @RequestBody(required = true,
+                                     @NotNull @RequestBody(
                                              content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                      schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
         if (!instrumentId.equals(instrumentDto.id())) {
@@ -94,7 +99,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @GET
     @Path("/search")
     @Operation
-    @APIResponse(responseCode = "200", description = "Instruments searched successfully")
+    @APIResponse(responseCode = "200", description = "Instruments searched successfully",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @RunOnVirtualThread
     public Response search(@NotNull @QueryParam("q") String query) {
         return handleResult(Result.success(instrumentService.search(query).value()), 200);
