@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$theme: mat.define-theme((
+  color: (
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+  ),
+  typography: (
+    brand-family: 'Roboto',
+    plain-family: 'Roboto',
+  ),
+));
+
+html {
+  @include mat.all-component-themes($theme);
+  @include mat.typography-hierarchy($theme);
+}
+
+html, body { 
+  height: 100%; 
+}
+
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #fcfcfc;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.m-1 { margin: 8px; }
+.p-1 { padding: 8px; }
+.m-2 { margin: 16px; }
+.p-2 { padding: 16px; }
+
+.mat-column-actions {
+  width: 140px;
+  text-align: center;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+mat-form-field.full-width {
+  width: 100%;
+}
