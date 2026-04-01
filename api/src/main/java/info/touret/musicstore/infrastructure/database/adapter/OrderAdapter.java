@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Adapter implementation of the {@link OrderPort}.
+ * Connects the domain layer to the underlying relational database using Hibernate ORM via Panache repositories.
+ */
 @ApplicationScoped
 public class OrderAdapter implements OrderPort {
     private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OrderAdapter.class);

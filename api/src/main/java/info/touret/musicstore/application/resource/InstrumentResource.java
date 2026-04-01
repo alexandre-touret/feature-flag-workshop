@@ -22,8 +22,12 @@ import org.jboss.resteasy.reactive.RestPath;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST API Resource for managing instruments.
+ * Exposes inbound HTTP endpoints and delegates business logic to the InstrumentService.
+ */
 @Path("/instruments")
-public class InstrumentResource {
+public class InstrumentResource extends AbstractMusicStoreResource{
 
     private final InstrumentMapper instrumentMapper;
     private final InstrumentService instrumentService;
@@ -97,29 +101,20 @@ public class InstrumentResource {
     }
 
     @SuppressWarnings("unchecked")
-    private Response handleResult(Result<?> result, int successStatus) {
+    @Override
+    protected Response handleResult(Result<?> result, int successStatus) {
         if (result.isSuccess()) {
             Object responseBody = result.value();
-            if (responseBody instanceof Instrument instrument && successStatus == 201) {
-                return Response.status(201).entity(Map.of("instrumentId", instrument.reference())).build();
-            }
-            if (responseBody instanceof Instrument instrument) {
-                return Response.status(successStatus).entity(instrumentMapper.toInstrumentDto(instrument)).build();
-            }
-            if(responseBody instanceof List<?> list){
-                return Response.status(successStatus).entity(instrumentMapper.toInstrumentDtos((List<Instrument>) list)).build();
-            }
-
-            return Response.status(successStatus).entity(responseBody).build();
+            return switch (responseBody) {
+                case Instrument instrument when successStatus == 201 ->
+                        Response.status(201).entity(Map.of("instrumentId", instrument.reference())).build();
+                case Instrument instrument ->
+                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDto(instrument)).build();
+                case List<?> list ->
+                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDtos((List<Instrument>) list)).build();
+                default -> Response.status(successStatus).entity(responseBody).build();
+            };
         }
         return toErrorResponse(result.error());
-    }
-
-    private Response toErrorResponse(DomainError error) {
-        return switch (error) {
-            case DomainError.DataNotFound e -> Response.status(404).entity(e.message()).build();
-            case DomainError.InvalidData e -> Response.status(400).entity(e.message()).build();
-            case DomainError.Conflict e -> Response.status(409).entity(e.message()).build();
-        };
     }
 }

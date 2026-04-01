@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Adapter implementation of the {@link InstrumentPort}.
+ * Connects the domain layer to the underlying relational database using Hibernate ORM via Panache repositories.
+ */
 @ApplicationScoped
 public class InstrumentAdapter implements InstrumentPort {
     private final static Logger LOGGER = LoggerFactory.getLogger(InstrumentAdapter.class);

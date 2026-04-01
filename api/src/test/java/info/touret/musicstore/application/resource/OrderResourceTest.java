@@ -88,7 +88,7 @@ class OrderResourceTest {
             .post("/orders")
             .then()
             .statusCode(201)
-            .assertThat().body("id", MatchesPattern.matchesPattern("[0-9a-f-]*"));
+            .assertThat().body("orderId", MatchesPattern.matchesPattern("[0-9a-f-]*"));
     }
 
     /// Test 4: Update an existing order successfully.

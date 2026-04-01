@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Data Transfer Object representing an Instrument in the API.
+ * Carries data from the client to the server and vice versa over REST endpoints.
+ */
 @JsonRootName("Instrument")
 public record InstrumentDto(@Min(0) Long id, @NotEmpty String name, @NotEmpty String reference,
                             @NotEmpty String manufacturer, @Min(0) Double price, @NotEmpty String description,

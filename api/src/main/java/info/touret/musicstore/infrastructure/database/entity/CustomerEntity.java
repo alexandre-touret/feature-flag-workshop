@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * JPA Entity representing a Customer record in the database.
+ */
 @Entity
 @Table(name = "customers")
 public class CustomerEntity {

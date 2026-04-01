@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotEmpty;
 
+/**
+ * JPA Embeddable entity representing a physical address.
+ */
 @Embeddable
 public class AddressEntity {
 
