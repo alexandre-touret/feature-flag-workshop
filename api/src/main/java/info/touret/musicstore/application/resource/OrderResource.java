@@ -2,7 +2,6 @@ package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.OrderDto;
 import info.touret.musicstore.application.mapper.OrderMapper;
-import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Order;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.OrderService;
@@ -23,8 +22,12 @@ import org.jboss.resteasy.reactive.RestPath;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST API Resource for managing orders.
+ * Exposes inbound HTTP endpoints and delegates business logic to the OrderService.
+ */
 @Path("/orders")
-public class OrderResource {
+public class OrderResource extends AbstractMusicStoreResource {
 
     private final OrderMapper orderMapper;
     private final OrderService orderService;
@@ -116,28 +119,19 @@ public class OrderResource {
     }
 
     @SuppressWarnings("unchecked")
-    private Response handleResult(Result<?> result, int successStatus) {
+    @Override
+    protected Response handleResult(Result<?> result, int successStatus) {
         if (result.isSuccess()) {
             Object responseBody = result.value();
-            if (responseBody instanceof info.touret.musicstore.domain.model.Order order && successStatus == 201) {
-                return Response.status(201).entity(Map.of("id", order.reference().toString())).build();
-            }
-            if (responseBody instanceof info.touret.musicstore.domain.model.Order order) {
-                return Response.status(successStatus).entity(orderMapper.toOrderDto(order)).build();
-            }
-            if (responseBody instanceof List<?> list) {
-                return Response.status(successStatus).entity(orderMapper.toOrderDtos((List<Order>) list)).build();
-            }
-            return Response.status(successStatus).entity(responseBody).build();
+            return switch (responseBody) {
+                case Order order when successStatus == 201 ->
+                        Response.status(201).entity(Map.of("orderId", order.reference())).build();
+                case Order order -> Response.status(successStatus).entity(orderMapper.toOrderDto(order)).build();
+                case List<?> list ->
+                        Response.status(successStatus).entity(orderMapper.toOrderDtos((List<Order>) list)).build();
+                default -> Response.status(successStatus).entity(responseBody).build();
+            };
         }
         return toErrorResponse(result.error());
-    }
-
-    private Response toErrorResponse(DomainError error) {
-        return switch (error) {
-            case DomainError.DataNotFound e -> Response.status(404).entity(e.message()).build();
-            case DomainError.InvalidData e -> Response.status(400).entity(e.message()).build();
-            case DomainError.Conflict e -> Response.status(409).entity(e.message()).build();
-        };
     }
 }

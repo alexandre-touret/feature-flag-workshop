@@ -10,6 +10,9 @@ import java.util.UUID;
 import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.CascadeType.ALL;
 
+/**
+ * JPA Entity representing an Order record in the database.
+ */
 @Entity
 @Table(name = "orders")
 @NamedQueries({
