@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  * Data Transfer Object representing a Customer in the API.
  */
 @JsonRootName("Customer")
+@Schema(name = "Customer", description = "Customer data")
 public record CustomerDto(@Min(0) Long id, @NotEmpty String firstname, @NotEmpty String lastname, @NotEmpty String email,
                           @NotNull AddressDto address) {
 }
