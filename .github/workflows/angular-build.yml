@@ -1,4 +1,4 @@
-name: angular-build.yml
+name: Angular CI
 
 on: [ push ]
 
