@@ -18,6 +18,7 @@
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <archunit-junit5.version>1.4.1</archunit-junit5.version>
+        <sonar.organization>touretinfo</sonar.organization>
     </properties>
 
     <dependencyManagement>
