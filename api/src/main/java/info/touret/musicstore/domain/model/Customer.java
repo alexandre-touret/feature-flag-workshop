@@ -11,4 +11,14 @@ package info.touret.musicstore.domain.model;
  * @param address The physical address of the customer
  */
 public record Customer (Long id, String firstname, String lastname, String email, Address address){
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", email='" + email + '\'' +
+                ", address=" + address +
+                '}';
+    }
 }

@@ -137,15 +137,31 @@ export class InstrumentEditComponent {
     type: [null as InstrumentType | null, Validators.required]
   });
 
+  constructor() {
+    effect(() => {
+      const id = this.id();
+      if (id && id !== 'new') {
+        this.isEditMode.set(true);
+      } else {
+        this.isEditMode.set(false);
+        this.instrumentForm.reset();
+      }
+    });
+
+    effect(() => {
+      const instrument = this.instrumentResource.value();
+      if (instrument) {
+        this.instrumentForm.patchValue(instrument);
+      }
+    });
+  }
+
   // Resource to load instrument data if in edit mode
   instrumentResource = resource({
     request: () => this.id(),
     loader: async ({ request: id }) => {
       if (!id || id === 'new') return null;
-      this.isEditMode.set(true);
-      const data = await firstValueFrom(this.instrumentService.getInstrument(Number(id)));
-      this.instrumentForm.patchValue(data);
-      return data;
+      return await firstValueFrom(this.instrumentService.getInstrument(Number(id)));
     }
   });
 

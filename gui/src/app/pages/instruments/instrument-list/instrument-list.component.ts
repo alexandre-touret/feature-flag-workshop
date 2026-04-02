@@ -1,4 +1,4 @@
-import { Component, inject, resource, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, resource, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -138,23 +138,39 @@ export class InstrumentListComponent {
   paginator = viewChild(MatPaginator);
   sort = viewChild(MatSort);
 
-  // Use Resource API for modern async data fetching
+  filter = signal('');
+
   instrumentsResource = resource({
-    loader: async () => {
-      const data = await firstValueFrom(this.instrumentService.getInstruments());
-      this.dataSource.data = data;
-      // Assign paginator and sort after data is loaded and signals update
-      setTimeout(() => {
-        this.dataSource.paginator = this.paginator() ?? null;
-        this.dataSource.sort = this.sort() ?? null;
-      });
-      return data;
+    request: () => ({ q: this.filter() }),
+    loader: async ({ request }) => {
+      const query = request.q;
+      // Si le champ est vide, on recharge tout
+      if (!query) {
+        return firstValueFrom(this.instrumentService.getInstruments());
+      }
+      // Si on a au moins 3 caractères, on cherche
+      if (query.length >= 3) {
+        return firstValueFrom(this.instrumentService.search(query));
+      }
+      // Sinon (entre 1 et 2 caractères), on garde les données affichées
+      return this.dataSource.data;
     }
   });
 
+  constructor() {
+    effect(() => {
+      const instruments = this.instrumentsResource.value();
+      if (instruments) {
+        this.dataSource.data = instruments;
+        this.dataSource.paginator = this.paginator() ?? null;
+        this.dataSource.sort = this.sort() ?? null;
+      }
+    });
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.filter.set(filterValue.trim());
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();

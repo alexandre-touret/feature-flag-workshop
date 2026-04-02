@@ -19,6 +19,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.resteasy.reactive.RestPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import java.util.Map;
 @Path("/orders")
 public class OrderResource extends AbstractMusicStoreResource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderResource.class);
     private final OrderMapper orderMapper;
     private final OrderService orderService;
 
@@ -92,6 +95,7 @@ public class OrderResource extends AbstractMusicStoreResource {
                                         content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                 schema = @Schema(implementation = OrderDto.class))) OrderDto orderDto) {
         if (!id.equals(orderDto.id())) {
+            LOGGER.error("Order id mismatch");
             return Response.status(400).entity("Order id mismatch").build();
         }
         var result = orderService.updateOrder(orderMapper.toOrder(orderDto));
@@ -109,6 +113,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     public Response deleteOrder(@NotNull @RestPath("id") String orderId) {
         var result = orderService.findById(Long.valueOf(orderId));
         if (result.isFailure()) {
+            LOGGER.error("Order not found");
             return toErrorResponse(result.error());
         }
         orderService.deleteOrder(result.value());

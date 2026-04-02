@@ -8,7 +8,7 @@ import { Instrument } from '../models/instrument.model';
 })
 export class InstrumentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/instruments';
+  private apiUrl = '/api/instruments';
 
   getInstruments(): Observable<Instrument[]> {
     return this.http.get<Instrument[]>(this.apiUrl);

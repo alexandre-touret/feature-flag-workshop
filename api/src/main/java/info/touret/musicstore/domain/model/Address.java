@@ -10,4 +10,14 @@ package info.touret.musicstore.domain.model;
  * @param country The country name
  */
 public record Address(String number, String street, String city, String zipCode, String country) {
+    @Override
+    public String toString() {
+        return "Address{" +
+                "number='" + number + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", zipCode='" + zipCode + '\'' +
+                ", country='" + country + '\'' +
+                '}';
+    }
 }

@@ -14,4 +14,16 @@ package info.touret.musicstore.domain.model;
  * @see InstrumentType
  */
 public record Instrument(Long id, String name, String reference, String manufacturer, Double price, String description, InstrumentType type) {
+    @Override
+    public String toString() {
+        return "Instrument{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", reference='" + reference + '\'' +
+                ", manufacturer='" + manufacturer + '\'' +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }
