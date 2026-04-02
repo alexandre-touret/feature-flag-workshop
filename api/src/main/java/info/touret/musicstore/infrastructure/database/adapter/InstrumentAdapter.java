@@ -25,7 +25,7 @@ import java.util.Optional;
  */
 @ApplicationScoped
 public class InstrumentAdapter implements InstrumentPort {
-    private final static Logger LOGGER = LoggerFactory.getLogger(InstrumentAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentAdapter.class);
     private final InstrumentRepository instrumentRepository;
     private final InstrumentMapper instrumentMapper;
 
@@ -47,12 +47,12 @@ public class InstrumentAdapter implements InstrumentPort {
         try {
             Objects.requireNonNull(instrument);
             InstrumentEntity instrumentToBeCreated = instrumentMapper.toInstrumentEntity(instrument);
-            LOGGER.info("Creating instrument: {}" , instrument);
+            LOGGER.info("Creating instrument: {}", instrument);
             instrumentRepository.persistAndFlush(instrumentToBeCreated);
-            LOGGER.info("Created instrument: {}" , instrumentToBeCreated);
+            LOGGER.info("Created instrument: {}", instrumentToBeCreated);
             return Result.success(instrumentMapper.toinstrument(instrumentToBeCreated));
         } catch (PersistenceException | ConstraintViolationException e) {
-            LOGGER.error("Instrument creation failed: {}" , instrument, e);
+            LOGGER.error("Instrument creation failed: {}", instrument, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }
@@ -67,7 +67,7 @@ public class InstrumentAdapter implements InstrumentPort {
             instrumentRepository.flush();
             return Result.success(instrumentMapper.toinstrument(merged));
         } catch (PersistenceException | ConstraintViolationException e) {
-            LOGGER.error("Instrument update failed: {}" , instrument, e);
+            LOGGER.error("Instrument update failed: {}", instrument, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }
@@ -77,17 +77,17 @@ public class InstrumentAdapter implements InstrumentPort {
     public Result<Boolean> delete(Instrument instrument) {
         try {
             Objects.requireNonNull(instrument.id());
-            LOGGER.info("Deleting instrument: {}" , instrument);
+            LOGGER.info("Deleting instrument: {}", instrument);
             var isDeleted = instrumentRepository.deleteById(instrument.id());
             if (isDeleted) {
                 LOGGER.info("Deleted instrument successfully");
                 return Result.success(isDeleted);
             } else {
-                LOGGER.error("Instrument deletion failed: {}" ,instrument);
+                LOGGER.error("Instrument deletion failed: {}", instrument);
                 return Result.failure(new DomainError.DataNotFound(String.format("Instrument %d not found", instrument.id())));
             }
         } catch (NullPointerException | PersistenceException e) {
-            LOGGER.error("Instrument deletion failed: {}",instrument,e);
+            LOGGER.error("Instrument deletion failed: {}", instrument, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }

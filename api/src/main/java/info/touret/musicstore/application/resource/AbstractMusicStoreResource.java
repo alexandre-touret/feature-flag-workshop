@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * Common methods for API Resources
  */
 public abstract class AbstractMusicStoreResource {
-    private final static Logger LOGGER = LoggerFactory.getLogger(AbstractMusicStoreResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMusicStoreResource.class);
 
     /**
      * Transform errors to HTTP responses

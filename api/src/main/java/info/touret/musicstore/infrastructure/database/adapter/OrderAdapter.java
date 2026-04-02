@@ -25,7 +25,7 @@ import java.util.Optional;
  */
 @ApplicationScoped
 public class OrderAdapter implements OrderPort {
-    private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OrderAdapter.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OrderAdapter.class);
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CustomerRepository customerRepository;
@@ -51,11 +51,11 @@ public class OrderAdapter implements OrderPort {
             if (orderToBeCreated.getCustomer() != null && orderToBeCreated.getCustomer().getId() != null && orderToBeCreated.getCustomer().getId() > 0L) {
                 orderToBeCreated.setCustomer(customerRepository.findById(orderToBeCreated.getCustomer().getId()));
             }
-            LOGGER.info("Creating order: {}" , order);
+            LOGGER.info("Creating order: {}", order);
             orderRepository.persistAndFlush(orderToBeCreated);
             return Result.success(orderMapper.toOrder(orderToBeCreated));
         } catch (PersistenceException | ConstraintViolationException e) {
-            LOGGER.error("Order creation failed: {}" , order, e);
+            LOGGER.error("Order creation failed: {}", order, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }
@@ -64,12 +64,12 @@ public class OrderAdapter implements OrderPort {
     @Override
     public Result<Order> update(Order order) {
         try {
-            LOGGER.info("Updating order: {}" , order);
+            LOGGER.info("Updating order: {}", order);
             OrderEntity merged = orderRepository.getEntityManager().merge(orderMapper.toOrderEntity(order));
             orderRepository.flush();
             return Result.success(orderMapper.toOrder(merged));
         } catch (PersistenceException | ConstraintViolationException e) {
-            LOGGER.error("Order update failed: {}" , order, e);
+            LOGGER.error("Order update failed: {}", order, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }
@@ -97,11 +97,11 @@ public class OrderAdapter implements OrderPort {
             if (isDeleted) {
                 return Result.success(isDeleted);
             } else {
-                LOGGER.error("Order deletion failed: {}" , order);
+                LOGGER.error("Order deletion failed: {}", order);
                 return Result.failure(new DomainError.DataNotFound(String.format("Order %d not found", order.id())));
             }
         } catch (NullPointerException | PersistenceException e) {
-            LOGGER.error("Order update failed: {}" , order, e);
+            LOGGER.error("Order update failed: {}", order, e);
             return Result.failure(new DomainError.InvalidData(e.getMessage()));
         }
     }

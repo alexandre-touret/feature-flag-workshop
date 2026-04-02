@@ -16,7 +16,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderPort orderPort;
-    private final static Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
 
     public OrderService(OrderPort orderPort) {
         this.orderPort = orderPort;
