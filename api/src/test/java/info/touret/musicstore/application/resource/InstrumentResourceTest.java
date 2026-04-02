@@ -49,11 +49,11 @@ class InstrumentResourceTest {
     @Order(3)
     @Test
     void should_update_an_instrument_successfully() {
-        var instrumentToBeDeleted = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        var instrumentToBeUpdated = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
                 .and()
-                .body(instrumentToBeDeleted)
+                .body(instrumentToBeUpdated)
                 .when()
                 .put("/instruments/100")
                 .then()
@@ -73,11 +73,11 @@ class InstrumentResourceTest {
     @Order(5)
     @Test
     void should_fail_updating_an_invalid_instrument() {
-        var instrumentToBeDeleted = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
+        var instrumentToBeUpdated = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
                 .and()
-                .body(instrumentToBeDeleted)
+                .body(instrumentToBeUpdated)
                 .when()
                 .put("/instruments/110")
                 .then()
@@ -102,7 +102,6 @@ class InstrumentResourceTest {
     @Order(7)
     @Test
     void should_fail_deleting_a_missing_instrument() {
-        var instrumentToBeDeleted = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
                 .when()

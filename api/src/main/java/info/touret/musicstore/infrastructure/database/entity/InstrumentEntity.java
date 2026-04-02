@@ -11,8 +11,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "instruments")
-@NamedQueries({
-        @NamedQuery(name = "InstrumentEntity.search", query = "from InstrumentEntity where lower(name) LIKE lower(concat('%',?1,'%')) OR lower(reference) LIKE lower(concat('%',?1,'%')) or lower(manufacturer) LIKE lower(concat('%',?1,'%'))")})
+@NamedQuery(name = "InstrumentEntity.search", query = "from InstrumentEntity where lower(name) LIKE lower(concat('%',?1,'%')) OR lower(reference) LIKE lower(concat('%',?1,'%')) or lower(manufacturer) LIKE lower(concat('%',?1,'%'))")
 public class InstrumentEntity {
 
     @Id

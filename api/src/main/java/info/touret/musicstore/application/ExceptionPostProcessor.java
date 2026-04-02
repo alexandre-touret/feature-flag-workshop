@@ -14,7 +14,7 @@ public class ExceptionPostProcessor implements ProblemPostProcessor {
     @Override
     public HttpProblem apply(HttpProblem problem, ProblemContext context) {
         return switch (context.cause) {
-            case IllegalArgumentException ignored ->
+            case IllegalArgumentException _ ->
                     HttpProblem.builder().withDetail(problem.getDetail()).withStatus(Response.Status.BAD_REQUEST).build();
             default -> problem;
         };

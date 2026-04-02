@@ -8,16 +8,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.*;
-import static jakarta.persistence.CascadeType.ALL;
 
 /**
  * JPA Entity representing an Order record in the database.
  */
 @Entity
 @Table(name = "orders")
-@NamedQueries({
-        @NamedQuery(name = "OrderEntity.search", query = "from OrderEntity where cast(reference as String) LIKE concat('%',?1,'%') OR lower(customer.firstname) LIKE lower(concat('%',?1,'%')) OR lower(customer.lastname) LIKE lower(concat('%',?1,'%'))")})
-
+@NamedQuery(name = "OrderEntity.search", query = "from OrderEntity where cast(reference as String) LIKE concat('%',?1,'%') OR lower(customer.firstname) LIKE lower(concat('%',?1,'%')) OR lower(customer.lastname) LIKE lower(concat('%',?1,'%'))")
 public class OrderEntity {
 
     @Id

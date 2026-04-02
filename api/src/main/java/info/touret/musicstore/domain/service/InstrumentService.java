@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class InstrumentService {
     private final InstrumentPort instrumentPort;
-    private final static Logger LOGGER = LoggerFactory.getLogger(InstrumentService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentService.class);
 
     public InstrumentService(InstrumentPort instrumentPort) {
         this.instrumentPort = instrumentPort;
