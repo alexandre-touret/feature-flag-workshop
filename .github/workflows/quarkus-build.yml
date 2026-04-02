@@ -16,6 +16,14 @@ jobs:
       - name: Build with Maven
         working-directory: ./api
         run: ./mvnw -B package --file pom.xml -Dmaven.test.skip=true
-      - name: Test with Quarkus
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Test with Quarkus & Analyse with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         working-directory: ./api
-        run: ./mvnw test -Dquarkus.test.continuous-testing=disabled
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=alexandre-touret_feature-flag-workshop
