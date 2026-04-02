@@ -29,7 +29,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: ./gui
-          sonar.projectKey: alexandre-touret_feature-flag-workshop
-          sonar.organization: touretinfo
+          args: >
+            -Dsonar.projectKey=alexandre-touret_feature-flag-workshop
+            -Dsonar.organization=touretinfo
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
