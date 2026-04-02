@@ -1,4 +1,4 @@
-import { Component, inject, resource, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, resource, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -147,21 +147,36 @@ export class OrderListComponent {
   paginator = viewChild(MatPaginator);
   sort = viewChild(MatSort);
 
+  filter = signal('');
+
   ordersResource = resource({
-    loader: async () => {
-      const data = await firstValueFrom(this.orderService.getOrders());
-      this.dataSource.data = data;
-      setTimeout(() => {
-        this.dataSource.paginator = this.paginator() ?? null;
-        this.dataSource.sort = this.sort() ?? null;
-      });
-      return data;
+    request: () => ({ q: this.filter() }),
+    loader: async ({ request }) => {
+      const query = request.q;
+      if (!query) {
+        return firstValueFrom(this.orderService.getOrders());
+      }
+      if (query.length >= 3) {
+        return firstValueFrom(this.orderService.search(query));
+      }
+      return this.dataSource.data;
     }
   });
 
+  constructor() {
+    effect(() => {
+      const orders = this.ordersResource.value();
+      if (orders) {
+        this.dataSource.data = orders;
+        this.dataSource.paginator = this.paginator() ?? null;
+        this.dataSource.sort = this.sort() ?? null;
+      }
+    });
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.filter.set(filterValue.trim());
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();

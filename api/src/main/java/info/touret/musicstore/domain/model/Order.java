@@ -17,4 +17,15 @@ import java.util.UUID;
  */
 public record Order(List<Instrument> instruments, Long id, UUID reference, ZonedDateTime orderDate,
                     Customer customer, OrderStatus orderStatus) {
+    @Override
+    public String toString() {
+        return "Order{" +
+                "instruments=" + instruments +
+                ", id=" + id +
+                ", reference=" + reference +
+                ", orderDate=" + orderDate +
+                ", customer=" + customer +
+                ", orderStatus=" + orderStatus +
+                '}';
+    }
 }

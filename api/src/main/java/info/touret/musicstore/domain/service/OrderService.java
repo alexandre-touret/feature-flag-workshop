@@ -17,26 +17,29 @@ public class OrderService {
 
     private final OrderPort orderPort;
     private final static Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+
     public OrderService(OrderPort orderPort) {
         this.orderPort = orderPort;
     }
 
     /**
      * Retrieves all orders currently in the system.
-     * 
+     *
      * @return A Result containing a list of all orders
      */
     public Result<List<Order>> findOrders() {
+        LOGGER.debug("Finding all orders");
         return orderPort.findAll();
     }
 
     /**
      * Creates a new customer order. Validates that the order does not already have an ID.
-     * 
+     *
      * @param order The order to create
      * @return A Result wrapping the created order, or a DomainError on validation failure
      */
     public Result<Order> createOrder(Order order) {
+        LOGGER.info("Creating order [{}]", order);
         if (order.id() != null) {
             LOGGER.error("order ID null for creation. Returning an failure");
             return Result.failure(new DomainError.InvalidData("Order id must be null for creation"));
@@ -46,11 +49,12 @@ public class OrderService {
 
     /**
      * Updates an existing order's information. Validates that the order already has an ID.
-     * 
+     *
      * @param order The updated order model
      * @return A Result wrapping the updated order, or a DomainError on validation failure
      */
     public Result<Order> updateOrder(Order order) {
+        LOGGER.info("Updating order [{}]", order);
         if (order.id() == null) {
             return Result.failure(new DomainError.InvalidData("Order id must not be null for update"));
         }
@@ -59,30 +63,33 @@ public class OrderService {
 
     /**
      * Deletes a given order from the system.
-     * 
+     *
      * @param order The order to delete
      */
     public void deleteOrder(Order order) {
+        LOGGER.info("Deleting order [{}]", order);
         orderPort.delete(order);
     }
 
     /**
      * Searches for orders matching a specific query string.
-     * 
+     *
      * @param query The search term
      * @return A Result containing a list of matching orders
      */
     public Result<List<Order>> search(String query) {
+        LOGGER.debug("Searching for orders by query [{}]]", query);
         return orderPort.search(query);
     }
 
     /**
      * Retrieves an order by its unique identifier.
-     * 
+     *
      * @param id The technical identifier of the order
      * @return A Result wrapping the found order, or a DomainError if not found
      */
     public Result<Order> findById(Long id) {
+        LOGGER.debug("Finding order by id [{}]", id);
         return orderPort.findById(id);
     }
 }

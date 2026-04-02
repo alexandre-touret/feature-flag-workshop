@@ -18,6 +18,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.resteasy.reactive.RestPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,7 @@ import java.util.Map;
  */
 @Path("/instruments")
 public class InstrumentResource extends AbstractMusicStoreResource{
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentResource.class);
     private final InstrumentMapper instrumentMapper;
     private final InstrumentService instrumentService;
 
@@ -46,6 +48,20 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @RunOnVirtualThread
     public Response retrieveInstruments() {
         var result = instrumentService.findInstruments();
+        return handleResult(result, 200);
+    }
+
+    @Operation(summary = "Retrieve an instrument by ID", description = "Retrieve a specific instrument using its unique identifier")
+    @APIResponse(responseCode = "200", description = "Instrument retrieved successfully",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class)))
+    @APIResponse(responseCode = "404", description = "Instrument not found",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
+    @APIResponse(responseCode = "500", description = "Internal server error")
+    @GET
+    @Path("/{instrumentId}")
+    @RunOnVirtualThread
+    public Response retrieveInstrument(@NotNull @RestPath("instrumentId") Long instrumentId) {
+        var result = instrumentService.findById(instrumentId);
         return handleResult(result, 200);
     }
 
@@ -76,6 +92,7 @@ public class InstrumentResource extends AbstractMusicStoreResource{
                                              content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                      schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
         if (!instrumentId.equals(instrumentDto.id())) {
+            LOGGER.error("Instrument id does not match");
             return Response.status(400).entity("Instrument id does not match").build();
         }
         var result = instrumentService.updateInstrument(instrumentMapper.toInstrument(instrumentDto));
@@ -90,6 +107,7 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     public Response deleteInstrument(@NotNull @RestPath("instrumentId") String instrumentId) {
         var result = instrumentService.findById(Long.valueOf(instrumentId));
         if (result.isFailure()) {
+            LOGGER.error("Instrument not found");
             return toErrorResponse(result.error());
         }
         instrumentService.deleteInstrument(result.value());
