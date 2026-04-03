@@ -3,6 +3,8 @@ package info.touret.musicstore.application.resource;
 import info.touret.musicstore.application.data.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import io.restassured.http.Header;
+import io.vertx.core.json.JsonObject;
 import org.hamcrest.core.Is;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.jupiter.api.*;
@@ -18,11 +20,11 @@ import java.util.UUID;
 @QuarkusTest
 class OrderResourceTest {
 
-    private OrderDto orderDto;
     private OrderDto orderCreation;
     private CustomerDto customerDto;
     private AddressDto addressDto;
     private InstrumentDto instrumentDto;
+    private Header userHeader;
 
     @BeforeEach
     void setUp() {
@@ -31,15 +33,7 @@ class OrderResourceTest {
         customerDto = new CustomerDto(null, "Alice", "Smith", "alice@test.com", addressDto);
         instrumentDto = new InstrumentDto(null, "Stratocaster", "FEN-STR-01", "Fender", 1200D, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         
-        orderDto = new OrderDto(
-            List.of(instrumentDto),
-            null, // Use existing order from test data
-            UUID.fromString("a0000000-0000-0000-0000-000000000001"),
-            ZonedDateTime.now(),
-            customerDto,
-            OrderStatusDto.CREATED
-        );
-        
+
         orderCreation = new OrderDto(
             List.of(instrumentDto),
             null, // No ID for creation
@@ -48,6 +42,8 @@ class OrderResourceTest {
             customerDto,
             OrderStatusDto.CREATED
         );
+
+        userHeader = new Header("User", JsonObject.mapFrom(new UserDto("John", "Doe", "john.doe@gmail.com", "France")).encode());
     }
 
     /// Test 1: Retrieve all orders successfully.
@@ -56,6 +52,7 @@ class OrderResourceTest {
     @Test
     void should_get_a_list_of_orders() {
         RestAssured.given()
+                .header(userHeader)
             .get("/orders")
             .then()
             .statusCode(200)
@@ -68,6 +65,7 @@ class OrderResourceTest {
     @Test
     void should_get_an_order_by_id() {
         RestAssured.given()
+                .header(userHeader)
             .when()
             .get("/orders/1")
             .then()
@@ -82,6 +80,7 @@ class OrderResourceTest {
     void should_create_an_order_successfully() {
         RestAssured.given()
             .header("Content-Type", "application/json")
+                .header(userHeader)
             .and()
             .body(orderCreation)
             .when()
@@ -107,6 +106,7 @@ class OrderResourceTest {
         
         RestAssured.given()
             .header("Content-Type", "application/json")
+                .header(userHeader)
             .and()
             .body(orderToUpdate)
             .when()
@@ -121,6 +121,7 @@ class OrderResourceTest {
     @Test
     void should_delete_an_order_successfully() {
         RestAssured.given()
+                .header(userHeader)
             .when()
             .delete("/orders/2")
             .then()
@@ -143,6 +144,7 @@ class OrderResourceTest {
         
         RestAssured.given()
             .header("Content-Type", "application/json")
+                .header(userHeader)
             .and()
             .body(orderToUpdate)
             .when()
@@ -157,6 +159,7 @@ class OrderResourceTest {
     @Test
     void should_fail_deleting_a_missing_order() {
         RestAssured.given()
+                .header(userHeader)
             .when()
             .delete("/orders/9999")
             .then()
@@ -168,6 +171,7 @@ class OrderResourceTest {
     @Test
     void should_search_orders_successfully() {
         RestAssured.given()
+                .header(userHeader)
             .get("/orders/search?q=Alice")
             .then()
             .statusCode(200)
@@ -179,6 +183,7 @@ class OrderResourceTest {
     @Test
     void should_fail_searching_with_empty_query() {
         RestAssured.given()
+                .header(userHeader)
             .get("/orders/search?q=")
             .then()
             .statusCode(400);
@@ -203,6 +208,7 @@ class OrderResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .body(orderToUpdate)
                 .when()
                 .put("/orders/10")
@@ -232,6 +238,7 @@ class OrderResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .body(orderToUpdate)
                 .when()
                 .put("/orders/10")
@@ -259,6 +266,7 @@ class OrderResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .body(orderToUpdate)
                 .when()
                 .put("/orders/10")
@@ -288,6 +296,7 @@ class OrderResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .body(invalidOrder)
                 .when()
                 .put("/orders/10")
@@ -306,6 +315,7 @@ class OrderResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .body(nullCustomerOrder)
                 .when()
                 .put("/orders/10")

@@ -1,16 +1,18 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
-import { toSignal } from '@angular/core/rxjs-interop';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatButtonModule} from '@angular/material/button';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatListModule} from '@angular/material/list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDividerModule} from '@angular/material/divider';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {Observable} from 'rxjs';
+import {map, shareReplay} from 'rxjs/operators';
+import {UserDialogComponent} from '../../dialogs/user-dialog/user-dialog.component';
+import {UserService} from '../../services/user.service';
 
 @Component({
   selector: 'app-layout',
@@ -24,6 +26,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatListModule,
     MatIconModule,
     MatDividerModule,
+    MatDialogModule,
   ],
   template: `
     <mat-sidenav-container class="sidenav-container">
@@ -63,11 +66,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
           }
           <span>Music Store Manager</span>
           <span class="spacer"></span>
-          <button mat-icon-button>
+          <button mat-icon-button (click)="openUserDialog()">
             <mat-icon>account_circle</mat-icon>
           </button>
         </mat-toolbar>
-        
+
         <main class="content">
           <router-outlet />
         </main>
@@ -78,7 +81,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     .sidenav-container {
       height: 100%;
     }
-    
+
     .sidenav {
       width: 240px;
       background-color: #3f51b5;
@@ -86,7 +89,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       border-radius: 0 !important;
     }
 
-    .sidenav mat-icon, 
+    .sidenav mat-icon,
     .sidenav .mat-list-item-title,
     .sidenav .logo-text,
     .sidenav .mat-mdc-list-item-title {
@@ -96,7 +99,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     .sidenav mat-divider {
       border-top-color: rgba(255, 255, 255, 0.12);
     }
-    
+
     .logo-container {
       display: flex;
       align-items: center;
@@ -115,7 +118,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     .sidenav .mat-toolbar {
       background: inherit;
     }
-    
+
     .mat-toolbar.mat-primary {
       position: sticky;
       top: 0;
@@ -136,10 +139,25 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class LayoutComponent {
   private breakpointObserver = inject(BreakpointObserver);
+  private dialog = inject(MatDialog);
+  private userService = inject(UserService);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
       shareReplay()
     );
+
+  openUserDialog(): void {
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      width: '450px',
+      data: this.userService.user()
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userService.setUser(result);
+      }
+    });
+  }
 }
