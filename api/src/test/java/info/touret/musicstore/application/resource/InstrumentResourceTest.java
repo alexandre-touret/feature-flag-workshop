@@ -2,8 +2,11 @@ package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.InstrumentDto;
 import info.touret.musicstore.application.data.InstrumentTypeDto;
+import info.touret.musicstore.application.data.UserDto;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import io.restassured.http.Header;
+import io.vertx.core.json.JsonObject;
 import org.hamcrest.core.Is;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.jupiter.api.*;
@@ -12,24 +15,33 @@ import org.junit.jupiter.api.*;
 @QuarkusTest
 class InstrumentResourceTest {
 
-    private InstrumentDto instrumentDto;
     private InstrumentDto instrumentCreation;
+    private Header userHeader;
 
     @BeforeEach
     void setUp() {
-        instrumentDto = new InstrumentDto(2000L, "Gibson Les Paul", "gibson-les-paul", "Gibson", 2000D, "Jimmy Page's guitar", InstrumentTypeDto.GUITAR);
         instrumentCreation = new InstrumentDto(null, "Gibson Les Paul", "gibson-les-paul", "Gibson", 2000D, "Jimmy Page's guitar", InstrumentTypeDto.GUITAR);
+        userHeader = new Header("User", JsonObject.mapFrom(new UserDto("John", "Doe", "john.doe@gmail.com", "France")).encode());
     }
 
     @Order(1)
     @Test
     void should_get_a_list_of_instruments() {
-        RestAssured.given().get("/instruments")
+        RestAssured.given()
+                .header(userHeader)
+                .get("/instruments")
                 .then()
                 .statusCode(200)
                 .assertThat().body("isEmpty()", Is.is(false));
     }
 
+    @Test
+    void should_get_a_list_of_instruments_without_header_failed() {
+        RestAssured.given()
+                .get("/instruments")
+                .then()
+                .statusCode(400);
+    }
 
     @Order(2)
     @Test
@@ -37,6 +49,7 @@ class InstrumentResourceTest {
 
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .and()
                 .body(instrumentCreation)
                 .when()
@@ -52,6 +65,7 @@ class InstrumentResourceTest {
         var instrumentToBeUpdated = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .and()
                 .body(instrumentToBeUpdated)
                 .when()
@@ -64,6 +78,7 @@ class InstrumentResourceTest {
     @Test
     void should_delete_an_instrument_successfully() {
         RestAssured.given()
+                .header(userHeader)
                 .when()
                 .delete("/instruments/100")
                 .then()
@@ -76,6 +91,7 @@ class InstrumentResourceTest {
         var instrumentToBeUpdated = new InstrumentDto(100L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .and()
                 .body(instrumentToBeUpdated)
                 .when()
@@ -90,6 +106,7 @@ class InstrumentResourceTest {
         var instrumentToBeUpdated = new InstrumentDto(300L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .and()
                 .body(instrumentToBeUpdated)
                 .when()
@@ -104,6 +121,7 @@ class InstrumentResourceTest {
     void should_fail_deleting_a_missing_instrument() {
         RestAssured.given()
                 .header("Content-Type", "application/json")
+                .header(userHeader)
                 .when()
                 .delete("/instruments/300")
                 .then()
@@ -113,7 +131,9 @@ class InstrumentResourceTest {
 
     @Test
     void should_search_successfully() {
-        RestAssured.given().get("/instruments/search?q=Fender")
+        RestAssured.given()
+                .header(userHeader)
+                .get("/instruments/search?q=Fender")
                 .then()
                 .statusCode(200)
                 .assertThat().body("isEmpty()", Is.is(false));
@@ -121,7 +141,9 @@ class InstrumentResourceTest {
 
     @Test
     void should_fail_searching() {
-        RestAssured.given().get("/instruments/search?q=")
+        RestAssured.given()
+                .header(userHeader)
+                .get("/instruments/search?q=")
                 .then()
                 .statusCode(400)
                 .assertThat().body("isEmpty()", Is.is(false));

@@ -1,12 +1,14 @@
 package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.InstrumentDto;
+import info.touret.musicstore.application.data.UserDto;
 import info.touret.musicstore.application.mapper.InstrumentMapper;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.InstrumentService;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -17,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +32,7 @@ import java.util.Map;
  * Exposes inbound HTTP endpoints and delegates business logic to the InstrumentService.
  */
 @Path("/instruments")
-public class InstrumentResource extends AbstractMusicStoreResource{
+public class InstrumentResource extends AbstractMusicStoreResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentResource.class);
     private final InstrumentMapper instrumentMapper;
     private final InstrumentService instrumentService;
@@ -46,7 +49,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
-    public Response retrieveInstruments() {
+    public Response retrieveInstruments(@NotNull @Valid @RestHeader("User") UserDto userDto) {
+        LOGGER.debug("User : {}", userDto);
         var result = instrumentService.findInstruments();
         return handleResult(result, 200);
     }
@@ -60,7 +64,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @GET
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response retrieveInstrument(@NotNull @RestPath("instrumentId") Long instrumentId) {
+    public Response retrieveInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId) {
+        LOGGER.debug("User : {}", userDto);
         var result = instrumentService.findById(instrumentId);
         return handleResult(result, 200);
     }
@@ -74,7 +79,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
-    public Response createInstrument(@NotNull InstrumentDto instrumentDto) {
+    public Response createInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull InstrumentDto instrumentDto) {
+        LOGGER.debug("User : {}", userDto);
         var result = instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto));
         return handleResult(result, 201);
     }
@@ -87,10 +93,11 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @PUT
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response updateInstrument(@NotNull @RestPath("instrumentId") Long instrumentId,
+    public Response updateInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId,
                                      @NotNull @RequestBody(
                                              content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                      schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
+        LOGGER.debug("User : {}", userDto);
         if (!instrumentId.equals(instrumentDto.id())) {
             LOGGER.error("Instrument id does not match");
             return Response.status(400).entity("Instrument id does not match").build();
@@ -104,7 +111,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @DELETE
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response deleteInstrument(@NotNull @RestPath("instrumentId") String instrumentId) {
+    public Response deleteInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") String instrumentId) {
+        LOGGER.debug("User : {}", userDto);
         var result = instrumentService.findById(Long.valueOf(instrumentId));
         if (result.isFailure()) {
             LOGGER.error("Instrument not found");
@@ -120,7 +128,8 @@ public class InstrumentResource extends AbstractMusicStoreResource{
     @APIResponse(responseCode = "200", description = "Instruments searched successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @RunOnVirtualThread
-    public Response search(@NotNull @QueryParam("q") String query) {
+    public Response search(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @QueryParam("q") String query) {
+        LOGGER.debug("User : {}", userDto);
         return handleResult(Result.success(instrumentService.search(query).value()), 200);
     }
 

@@ -1,6 +1,7 @@
 package info.touret.musicstore.application.resource;
 
 import info.touret.musicstore.application.data.OrderDto;
+import info.touret.musicstore.application.data.UserDto;
 import info.touret.musicstore.application.mapper.OrderMapper;
 import info.touret.musicstore.domain.model.Order;
 import info.touret.musicstore.domain.model.Result;
@@ -18,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,8 @@ public class OrderResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
-    public Response retrieveOrders() {
+    public Response retrieveOrders(@NotNull @Valid @RestHeader("User") UserDto userDto) {
+        LOGGER.debug("User : {}", userDto);
         return handleResult(orderService.findOrders(), 200);
     }
 
@@ -61,7 +64,8 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response retrieveOrder(@NotNull @RestPath("id") Long id) {
+    public Response retrieveOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") Long id) {
+        LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(id);
         return handleResult(result, 200);
     }
@@ -74,7 +78,8 @@ public class OrderResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
-    public Response createOrder(@NotNull @Valid OrderDto orderDto) {
+    public Response createOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @Valid OrderDto orderDto) {
+        LOGGER.debug("User : {}", userDto);
         var result = orderService.createOrder(orderMapper.toOrder(orderDto));
         return handleResult(result, 201);
     }
@@ -90,10 +95,11 @@ public class OrderResource extends AbstractMusicStoreResource {
     @PUT
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response updateOrder(@NotNull @RestPath("id") Long id,
+    public Response updateOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") Long id,
                                 @NotNull @Valid @RequestBody(
                                         content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                 schema = @Schema(implementation = OrderDto.class))) OrderDto orderDto) {
+        LOGGER.debug("User : {}", userDto);
         if (!id.equals(orderDto.id())) {
             LOGGER.error("Order id mismatch");
             return Response.status(400).entity("Order id mismatch").build();
@@ -110,7 +116,8 @@ public class OrderResource extends AbstractMusicStoreResource {
     @DELETE
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response deleteOrder(@NotNull @RestPath("id") String orderId) {
+    public Response deleteOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") String orderId) {
+        LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(Long.valueOf(orderId));
         if (result.isFailure()) {
             LOGGER.error("Order not found");
@@ -129,7 +136,8 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/search")
     @RunOnVirtualThread
-    public Response search(@NotNull @QueryParam("q") String query) {
+    public Response search(@RestHeader("User") UserDto userDto, @NotNull @QueryParam("q") String query) {
+        LOGGER.debug("User : {}", userDto);
         var result = orderService.search(query);
         return handleResult(result, 200);
 
