@@ -49,8 +49,7 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
-    public Response retrieveInstruments(@NotNull @Valid @RestHeader("User") UserDto userDto) {
-        LOGGER.debug("User : {}", userDto);
+    public Response retrieveInstruments(@NotNull @Valid @RestHeader(USER) UserDto userDto) {
         var result = instrumentService.findInstruments();
         return handleResult(result, 200);
     }
@@ -64,8 +63,7 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @GET
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response retrieveInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId) {
-        LOGGER.debug("User : {}", userDto);
+    public Response retrieveInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId) {
         var result = instrumentService.findById(instrumentId);
         return handleResult(result, 200);
     }
@@ -79,8 +77,7 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
-    public Response createInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull InstrumentDto instrumentDto) {
-        LOGGER.debug("User : {}", userDto);
+    public Response createInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull InstrumentDto instrumentDto) {
         var result = instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto));
         return handleResult(result, 201);
     }
@@ -93,11 +90,10 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @PUT
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response updateInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId,
+    public Response updateInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId,
                                      @NotNull @RequestBody(
                                              content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                      schema = @Schema(implementation = InstrumentDto.class))) InstrumentDto instrumentDto) {
-        LOGGER.debug("User : {}", userDto);
         if (!instrumentId.equals(instrumentDto.id())) {
             LOGGER.error("Instrument id does not match");
             return Response.status(400).entity("Instrument id does not match").build();
@@ -111,8 +107,7 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @DELETE
     @Path("/{instrumentId}")
     @RunOnVirtualThread
-    public Response deleteInstrument(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("instrumentId") String instrumentId) {
-        LOGGER.debug("User : {}", userDto);
+    public Response deleteInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("instrumentId") String instrumentId) {
         var result = instrumentService.findById(Long.valueOf(instrumentId));
         if (result.isFailure()) {
             LOGGER.error("Instrument not found");
@@ -128,7 +123,7 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "200", description = "Instruments searched successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @RunOnVirtualThread
-    public Response search(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @QueryParam("q") String query) {
+    public Response search(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @QueryParam("q") String query) {
         LOGGER.debug("User : {}", userDto);
         return handleResult(Result.success(instrumentService.search(query).value()), 200);
     }

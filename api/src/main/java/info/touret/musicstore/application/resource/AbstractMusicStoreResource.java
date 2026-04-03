@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractMusicStoreResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMusicStoreResource.class);
-
+    public static final String USER = "User";
     /**
      * Transform errors to HTTP responses
      *

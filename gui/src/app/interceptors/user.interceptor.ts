@@ -14,5 +14,20 @@ export const userInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq);
   }
 
-  return next(req);
+  // To prevent null exception on the backend, ensure at least an empty user structure
+  // is passed or use a fallback if user is null.
+  // Note: the service is already providing a defaultUser so it shouldn't be null,
+  // but as a fail-safe we add a default header if missing.
+  const fallbackUserJson = JSON.stringify({
+    firstName: 'Unknown',
+    lastName: 'Unknown',
+    email: 'unknown@example.com',
+    country: 'Unknown'
+  });
+
+  const safeReq = req.clone({
+    headers: req.headers.set('User', fallbackUserJson)
+  });
+
+  return next(safeReq);
 };

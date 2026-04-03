@@ -6,6 +6,13 @@ import {User} from '../models/user.model';
 })
 export class UserService {
   private readonly USER_KEY = 'music_store_user';
+  private readonly defaultUser: User = {
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    country: 'US'
+  };
+
   private userSignal = signal<User | null>(this.loadUser());
 
   user = this.userSignal.asReadonly();
@@ -22,9 +29,9 @@ export class UserService {
         return JSON.parse(storedUser);
       } catch (e) {
         console.error('Failed to parse stored user', e);
-        return null;
+        return this.defaultUser;
       }
     }
-    return null;
+    return this.defaultUser;
   }
 }
