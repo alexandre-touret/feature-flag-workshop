@@ -67,6 +67,7 @@ You **MUST** have sat up these tools first:
 * [Java 21+](https://adoptium.net/temurin/releases/?version=21)
 * [Maven 3.9](https://www.maven.apache.org/)
 * [Docker](https://docs.docker.com/)
+* [NodeJS/NPM](https://nodejs.org/en/)
 * Any IDE ([IntelliJ IDEA](https://www.jetbrains.com/idea), [VSCode](https://code.visualstudio.com/), [Netbeans](https://netbeans.apache.org/),...) you want.
 
 🛠️ You can validate your environment running these commands:
@@ -104,7 +105,17 @@ Built:             Tue Sep 10 15:41:39 2024
 OS/Arch:           linux/amd64
 Context:           default
 
+```
 
+**NodeJS**
+node --version
+v24.11.1
+
+**NPM**
+
+```jshelllanguage
+npm --version
+11.12.1
 ```
 
 **If you don't want to bother with a local setup**
@@ -138,17 +149,27 @@ Wait until the codeSpace is ready.
 
 During the first startup, the maven build is automatically started. Please wait until it is completely finished.
 
-### 🛠 Start the app
+### 🛠 Start the backend
 
 In a new terminal, start the Quarkus Dev environment:
 
 ```jshelllanguage
+$ cd api
 $ ./mvnw quarkus:dev
 ```
 
 👀 Wait a while until you get the following output:
 
-TODO
+```jshelllanguage
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2026-04-03 12:01:28,150 INFO  [io.quarkus] (Quarkus Main Thread) music-store-api 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.32.4) started in 12.962s. Listening on: http://localhost:8080
+2026-04-03 12:01:28,158 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
+2026-04-03 12:01:28,160 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [agroal, cdi, compose, hibernate-orm, hibernate-orm-panache, hibernate-validator, jdbc-h2, narayana-jta, rest, rest-jackson, resteasy-problem, smallrye-context-propagation, smallrye-openapi, swagger-ui, vertx]
+--
+```
 
 ℹ️ All the stack is provided through the [Quarkus Dev Services](https://quarkus.io/guides/dev-services).
 You don't therefore have to bother yourself about setting it up.
@@ -161,6 +182,10 @@ Select the port tab:
 
 ![Port VSCODE](./assets/port_vscode.png)
 
+Configure the port as public:
+
+![Port Visibility VSCODE](./assets/change_port_visibility.png)
+
 And now, go the URL which exposes the 8080 port:
 
 ![start-8080](./assets/start_dev_ui.png)
@@ -172,3 +197,86 @@ For instance: ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev/q/dev
 ℹ️ You can also browse the dev-ui to the ``Extensions>SmallRye OpenAPI``.
 
 ![Small Rye](./assets/dev_ui_extensions.png)
+
+
+### 🛠 Start the frontend
+
+#### Backend URL configuration
+
+Pick up the previous URL (e.g., ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev``) and configure the ``gui/src/proxy.conf.json`` file to reach the backend API:
+
+Update the ``target`` and ``secure`` attributes as following:
+
+From:
+
+```json
+{
+  "/api": {
+    "target": "http://localhost:8080",
+    "secure": false,
+  [...]
+  }
+}
+```
+
+to
+
+
+```json
+{
+  "/api": {
+    "target": "https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev",
+    "secure": true,
+  [...]
+  }
+}
+```
+
+In a new terminal, start the frontend dev environment:
+
+```jshelllanguage
+$ cd gui
+$ npm start
+```
+
+👀 Wait a while until you get the following output:
+
+```jshelllanguage
+@alexandre-touret ➜ /workspaces/feature-flag-workshop/gui (feat/user_identification) $ npm start
+
+> music-store-gui@0.0.0 start
+> ng serve
+
+Component HMR has been enabled, see https://angular.dev/hmr for more info.
+Initial chunk files | Names                     |  Raw size
+polyfills.js        | polyfills                 |  89.77 kB |
+styles.css          | styles                    |  56.10 kB |
+main.js             | main                      |  32.28 kB |
+chunk-C4KO2HLL.js   | -                         | 614 bytes |
+
+                    | Initial total             | 178.76 kB
+
+Lazy chunk files    | Names                     |  Raw size
+chunk-OIKUF33N.js   | order-list-component      |  23.59 kB |
+chunk-VWXPALOA.js   | order-edit-component      |  22.87 kB |
+chunk-BMIW6227.js   | instrument-list-component |  22.79 kB |
+chunk-FZXZTTLL.js   | instrument-edit-component |  16.86 kB |
+chunk-C76H5XNX.js   | -                         |   4.80 kB |
+chunk-GCFUDT6G.js   | -                         |   1.67 kB |
+chunk-NFXMSM4A.js   | -                         |   1.39 kB |
+
+Application bundle generation complete. [16.550 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/
+```
+
+
+✅ Now validate your setup browsing the **Music Store Manager Web UI**
+
+Go to the ports tab (see above for more details) and select the URL exposed through the port ``4200`` that corresponds to the process ``ng serve``.
+
+Open it and you should see this content:
+
+![Music Store Manager GUI](./assets/Music_Store_Manager.png)
