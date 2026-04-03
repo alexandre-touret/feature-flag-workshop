@@ -16,6 +16,7 @@ Before you begin this lab, you'll need to set up a few tools on your machine.
 | [Java](https://www.oracle.com/java/)      | intermediate |   
 | [Maven](https://www.maven.apache.org/)    | novice       |
 | [Quarkus](https://quarkus.io)             | novice       |
+| [Angular](https://angular.io)             | novice       |
 | [REST API](https://www.maven.apache.org/) | proficient   |
 
 ### Icons & Conventions
