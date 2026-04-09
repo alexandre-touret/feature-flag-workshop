@@ -199,8 +199,11 @@ For instance: ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev/q/dev
 
 ![Small Rye](./assets/dev_ui_extensions.png)
 
+:::warning
+
 Unfortunately you will unable to test this API through the SwaggerUI. It seems to not support the usage of JSON headers.
 
+:::
 You can test it using httpie in a console :
 
 ```bash
