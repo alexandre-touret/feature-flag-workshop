@@ -178,6 +178,7 @@ src/main/java/info/touret/musicstore/domain/
 │   ├── InstrumentType.java
 │   ├── Order.java
 │   ├── OrderStatus.java
+│   ├── User.java
 │   └── Result.java
 ├── port
 │   ├── InstrumentPort.java
@@ -187,7 +188,7 @@ src/main/java/info/touret/musicstore/domain/
     └── OrderService.java
 ```
 
-3. The connection to the database (the concrete adapters) is implemented in the ``info.touret.musicstore.infrastructure``
+3. The connection to the database (the concrete adapters) is implemented in the ``info.touret.musicstore.infrastructure.database``
 
 ```shell
 src/main/java/info/touret/musicstore/infrastructure/
@@ -203,6 +204,16 @@ src/main/java/info/touret/musicstore/infrastructure/
     └── mapper
         ├── InstrumentEntityMapper.java
         └── OrderEntityMapper.java
+```
+
+4.. The connection to the feature-flag system will be implemented in the ``info.touret.musicstore.infrastructure.featureflag``
+
+```shell
+src/main/java/info/touret/musicstore/infrastructure/
+└── database
+    ├── adapter
+    └──  ├── DiscountAdapter.java
+
 ```
 
 #### Structure of the frontend

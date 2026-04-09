@@ -1,21 +1,25 @@
-import { Component, effect, inject, resource, signal, viewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
+import {Component, effect, inject, OnInit, resource, signal, viewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
+import {MatSort, MatSortModule} from '@angular/material/sort';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatCardModule} from '@angular/material/card';
+import {MatChipsModule} from '@angular/material/chips';
 
-import { InstrumentService } from '../../../services/instrument.service';
-import { Instrument } from '../../../models/instrument.model';
-import { ConfirmDialogComponent } from '../../../dialogs/confirm-dialog/confirm-dialog.component';
-import { firstValueFrom } from 'rxjs';
+import {InstrumentService} from '../../../services/instrument.service';
+import {Instrument} from '../../../models/instrument.model';
+import {ConfirmDialogComponent} from '../../../dialogs/confirm-dialog/confirm-dialog.component';
+import {firstValueFrom} from 'rxjs';
+
+// TODO: Chapter 5 - Uncomment to import OpenFeature
+// import { OpenFeature } from '@openfeature/web-sdk';
 
 @Component({
   selector: 'app-instrument-list',
@@ -32,7 +36,8 @@ import { firstValueFrom } from 'rxjs';
     MatFormFieldModule,
     MatDialogModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    MatChipsModule
   ],
   template: `
     <div class="header">
@@ -44,11 +49,22 @@ import { firstValueFrom } from 'rxjs';
 
     <mat-card class="m-2">
       <mat-card-content>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Filter</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Fender" #input>
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+        <div class="toolbar-actions">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filter</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Fender" #input>
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          @if (showDiscountBanner()) {
+            <mat-chip-set class="discount-banner">
+              <mat-chip class="promo-chip" highlighted color="accent">
+                <mat-icon matChipAvatar>auto_awesome</mat-icon>
+                Loyalty Discount Active!
+              </mat-chip>
+            </mat-chip-set>
+          }
+        </div>
 
         @if (instrumentsResource.isLoading()) {
           <div class="spinner-container">
@@ -79,7 +95,14 @@ import { firstValueFrom } from 'rxjs';
 
               <ng-container matColumnDef="price">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Price </th>
-                <td mat-cell *matCellDef="let row"> {{row.price | currency:'EUR'}} </td>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.hasDiscount && showDiscountBanner()) {
+                    <span class="original-price">{{ row.originalPrice | currency:'EUR' }}</span>
+                    <span class="discounted-price">{{ row.price | currency:'EUR' }}</span>
+                  } @else {
+                    {{ row.price | currency:'EUR' }}
+                  }
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
@@ -115,6 +138,38 @@ import { firstValueFrom } from 'rxjs';
       align-items: center;
       margin: 16px;
     }
+
+    .toolbar-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .filter-field {
+      flex: 1;
+    }
+
+    .discount-banner {
+      margin-bottom: 20px;
+    }
+
+    .promo-chip {
+      background-color: #ffd740 !important;
+      font-weight: bold;
+    }
+
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      margin-right: 8px;
+      font-size: 0.9em;
+    }
+
+    .discounted-price {
+      color: #e91e63;
+      font-weight: bold;
+    }
     .spinner-container {
       display: flex;
       justify-content: center;
@@ -128,7 +183,7 @@ import { firstValueFrom } from 'rxjs';
     }
   `
 })
-export class InstrumentListComponent {
+export class InstrumentListComponent implements OnInit {
   private instrumentService = inject(InstrumentService);
   private dialog = inject(MatDialog);
 
@@ -139,6 +194,9 @@ export class InstrumentListComponent {
   sort = viewChild(MatSort);
 
   filter = signal('');
+
+  // Chapter 5 - Feature Flag for UI display
+  showDiscountBanner = signal(false);
 
   instrumentsResource = resource({
     request: () => ({ q: this.filter() }),
@@ -166,6 +224,17 @@ export class InstrumentListComponent {
         this.dataSource.sort = this.sort() ?? null;
       }
     });
+  }
+
+  ngOnInit() {
+    this.initFeatureFlags();
+  }
+
+  private async initFeatureFlags() {
+    // TODO: Implement OpenFeature initialization
+
+    // For now, manually toggle or keep false
+    this.showDiscountBanner.set(true);
   }
 
   applyFilter(event: Event) {

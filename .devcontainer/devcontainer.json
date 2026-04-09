@@ -22,7 +22,8 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "24",
       "nodeGypDependencies": true
-    }
+    },
+    "ghcr.io/ferdinandkeller/features/httpie:0": {}
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [

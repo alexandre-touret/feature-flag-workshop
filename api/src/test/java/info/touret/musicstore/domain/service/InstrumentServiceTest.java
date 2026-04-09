@@ -3,6 +3,8 @@ package info.touret.musicstore.domain.service;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.InstrumentType;
 import info.touret.musicstore.domain.model.Result;
+import info.touret.musicstore.domain.model.User;
+import info.touret.musicstore.domain.port.DiscountPort;
 import info.touret.musicstore.domain.port.InstrumentPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,11 +21,13 @@ class InstrumentServiceTest {
     private InstrumentService instrumentService;
     private InstrumentPort instrumentPort;
     private Instrument gibsones335;
+    private DiscountPort discountPort;
 
     @BeforeEach
     void setUp() {
         instrumentPort = mock(InstrumentPort.class);
-        instrumentService = new InstrumentService(instrumentPort);
+        discountPort = mock(DiscountPort.class);
+        instrumentService = new InstrumentService(instrumentPort, discountPort);
         gibsones335 = new Instrument(1L, "Gibson ES 335", "ES 355", "Gibson", 2444D, "Chuck Berry's Guitar", InstrumentType.GUITAR);
     }
 
@@ -57,5 +61,13 @@ class InstrumentServiceTest {
     void should_delete_successfully() {
         when(instrumentPort.delete(gibsones335)).thenReturn(Result.success(true));
         assertTrue(instrumentService.deleteInstrument(gibsones335).isSuccess());
+    }
+
+    @Test
+    void should_apply_discount_successfully() {
+        //TODO: MUST be implemented later
+        var user = new User("John", "Doe", "john.doe@gmail.com", "France");
+        when(discountPort.applyDiscount(gibsones335, user)).thenReturn(Result.success(gibsones335));
+        assertEquals(Result.success(gibsones335).value().price(), instrumentService.applyDiscount(gibsones335, user).value().price());
     }
 }

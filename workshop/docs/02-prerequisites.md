@@ -199,6 +199,17 @@ For instance: ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev/q/dev
 
 ![Small Rye](./assets/dev_ui_extensions.png)
 
+Unfortunately you will unable to test this API through the SwaggerUI. It seems to not support the usage of JSON headers.
+
+You can test it using httpie in a console :
+
+```bash
+http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+```
+
+```bash
+http :8080/orders User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+```
 
 ### 🛠 Start the frontend
 
@@ -272,7 +283,6 @@ Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
   ➜  Local:   http://localhost:4200/
 ```
-
 
 ✅ Now validate your setup browsing the **Music Store Manager Web UI**
 

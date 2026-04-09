@@ -26,6 +26,7 @@ public class ArchitectureTest {
                     .domainServices("..domain.(service|port|exception)..")
                     .applicationServices("..application..")
                     .adapter("database", "..database..")
+                    .adapter("featureflag", "..featureflag..")
                     .ensureAllClassesAreContainedInArchitecture();
 
     @ArchTest

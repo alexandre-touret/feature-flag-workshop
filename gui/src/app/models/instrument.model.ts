@@ -1,4 +1,4 @@
-import { InstrumentType } from './instrument-type.enum';
+import {InstrumentType} from './instrument-type.enum';
 
 export interface Instrument {
   id?: number;
@@ -8,4 +8,6 @@ export interface Instrument {
   price: number;
   description: string;
   type: InstrumentType;
+  originalPrice?: number;
+  hasDiscount?: boolean;
 }
