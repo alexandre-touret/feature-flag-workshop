@@ -3,6 +3,7 @@ package info.touret.musicstore.application.resource;
 import info.touret.musicstore.application.data.InstrumentDto;
 import info.touret.musicstore.application.data.UserDto;
 import info.touret.musicstore.application.mapper.InstrumentMapper;
+import info.touret.musicstore.application.mapper.UserMapper;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.InstrumentService;
@@ -14,9 +15,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.resteasy.reactive.RestHeader;
@@ -36,14 +39,17 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentResource.class);
     private final InstrumentMapper instrumentMapper;
     private final InstrumentService instrumentService;
+    private final UserMapper userMapper;
 
     @Inject
-    public InstrumentResource(InstrumentMapper instrumentMapper, InstrumentService instrumentService) {
+    public InstrumentResource(InstrumentMapper instrumentMapper, InstrumentService instrumentService, UserMapper userMapper) {
         this.instrumentMapper = instrumentMapper;
         this.instrumentService = instrumentService;
+        this.userMapper = userMapper;
     }
 
     @Operation(summary = "Retrieve all instruments", description = "Retrieve all instruments")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Instruments retrieved successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @APIResponse(responseCode = "500", description = "Internal server error")
@@ -51,10 +57,11 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @RunOnVirtualThread
     public Response retrieveInstruments(@NotNull @Valid @RestHeader(USER) UserDto userDto) {
         var result = instrumentService.findInstruments();
-        return handleResult(result, 200);
+        return handleResult(result, 200, userDto);
     }
 
     @Operation(summary = "Retrieve an instrument by ID", description = "Retrieve a specific instrument using its unique identifier")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Instrument retrieved successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class)))
     @APIResponse(responseCode = "404", description = "Instrument not found",
@@ -65,11 +72,12 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @RunOnVirtualThread
     public Response retrieveInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("instrumentId") Long instrumentId) {
         var result = instrumentService.findById(instrumentId);
-        return handleResult(result, 200);
+        return handleResult(result, 200, userDto);
     }
 
 
-    @Operation
+    @Operation(summary = "Create an instrument", description = "Create a new instrument")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "201", description = "Instrument created successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class)))
     @APIResponse(responseCode = "400", description = "Invalid data",
@@ -79,10 +87,11 @@ public class InstrumentResource extends AbstractMusicStoreResource {
     @RunOnVirtualThread
     public Response createInstrument(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull InstrumentDto instrumentDto) {
         var result = instrumentService.createInstrument(instrumentMapper.toInstrument(instrumentDto));
-        return handleResult(result, 201);
+        return handleResult(result, 201, userDto);
     }
 
-    @Operation
+    @Operation(summary = "Update an instrument", description = "Update an existing instrument")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Instrument updated successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class)))
     @APIResponse(responseCode = "404", description = "Instrument not found",
@@ -99,10 +108,11 @@ public class InstrumentResource extends AbstractMusicStoreResource {
             return Response.status(400).entity("Instrument id does not match").build();
         }
         var result = instrumentService.updateInstrument(instrumentMapper.toInstrument(instrumentDto));
-        return handleResult(result, 200);
+        return handleResult(result, 200, userDto);
     }
 
-    @Operation
+    @Operation(summary = "Delete an instrument", description = "Delete an existing instrument")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "204", description = "Instrument deleted successfully")
     @DELETE
     @Path("/{instrumentId}")
@@ -119,30 +129,35 @@ public class InstrumentResource extends AbstractMusicStoreResource {
 
     @GET
     @Path("/search")
-    @Operation
+    @Operation(summary = "Search instruments", description = "Search for instruments by query")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Instruments searched successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InstrumentDto.class, type = SchemaType.ARRAY)))
     @RunOnVirtualThread
     public Response search(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @QueryParam("q") String query) {
         LOGGER.debug("User : {}", userDto);
-        return handleResult(Result.success(instrumentService.search(query).value()), 200);
+        return handleResult(Result.success(instrumentService.search(query).value()), 200, userDto);
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    protected Response handleResult(Result<?> result, int successStatus) {
+    protected Response handleResult(Result<?> result, int successStatus, UserDto user) {
         if (result.isSuccess()) {
             Object responseBody = result.value();
             return switch (responseBody) {
                 case Instrument instrument when successStatus == 201 ->
                         Response.status(201).entity(Map.of("instrumentId", instrument.reference())).build();
                 case Instrument instrument ->
-                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDto(instrument)).build();
+                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDto(instrumentService.applyDiscount(instrument, userMapper.toUser(user)).value())).build();
                 case List<?> list ->
-                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDtos((List<Instrument>) list)).build();
+                        Response.status(successStatus).entity(instrumentMapper.toInstrumentDtos(((List<Instrument>) list).stream().map(i -> instrumentService.applyDiscount(i, userMapper.toUser(user)).value()).toList())).build();
                 default -> Response.status(successStatus).entity(responseBody).build();
             };
         }
         return toErrorResponse(result.error());
+    }
+
+    @Override
+    protected Response handleResult(Result<?> result, int successStatus) {
+        return handleResult(result, successStatus, null);
     }
 }

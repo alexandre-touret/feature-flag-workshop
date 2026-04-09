@@ -14,9 +14,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.resteasy.reactive.RestHeader;
@@ -45,17 +47,19 @@ public class OrderResource extends AbstractMusicStoreResource {
     }
 
     @Operation(summary = "Retrieve all orders", description = "Retrieve all orders from the music store")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Orders retrieved successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OrderDto.class, type = SchemaType.ARRAY)))
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
-    public Response retrieveOrders(@NotNull @Valid @RestHeader("User") UserDto userDto) {
+    public Response retrieveOrders(@NotNull @Valid @RestHeader(USER) UserDto userDto) {
         LOGGER.debug("User : {}", userDto);
         return handleResult(orderService.findOrders(), 200);
     }
 
     @Operation(summary = "Retrieve an order by ID", description = "Retrieve a specific order using its unique identifier")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Order retrieved successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OrderDto.class)))
     @APIResponse(responseCode = "404", description = "Order not found",
@@ -64,13 +68,14 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response retrieveOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") Long id) {
+    public Response retrieveOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") Long id) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(id);
         return handleResult(result, 200);
     }
 
     @Operation(summary = "Create a new order", description = "Create a new order in the music store")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "201", description = "Order created successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class)))
     @APIResponse(responseCode = "400", description = "Invalid request body",
@@ -78,13 +83,14 @@ public class OrderResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
-    public Response createOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @Valid OrderDto orderDto) {
+    public Response createOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @Valid OrderDto orderDto) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.createOrder(orderMapper.toOrder(orderDto));
         return handleResult(result, 201);
     }
 
     @Operation(summary = "Update an order", description = "Update an existing order using its unique identifier")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Order updated successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OrderDto.class)))
     @APIResponse(responseCode = "400", description = "Order ID mismatch",
@@ -95,7 +101,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @PUT
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response updateOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") Long id,
+    public Response updateOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") Long id,
                                 @NotNull @Valid @RequestBody(
                                         content = @Content(mediaType = MediaType.APPLICATION_JSON,
                                                 schema = @Schema(implementation = OrderDto.class))) OrderDto orderDto) {
@@ -109,6 +115,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     }
 
     @Operation(summary = "Delete an order", description = "Delete an order from the music store")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "204", description = "Order deleted successfully")
     @APIResponse(responseCode = "404", description = "Order not found",
             content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
@@ -116,7 +123,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @DELETE
     @Path("/{id}")
     @RunOnVirtualThread
-    public Response deleteOrder(@NotNull @Valid @RestHeader("User") UserDto userDto, @NotNull @RestPath("id") String orderId) {
+    public Response deleteOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") String orderId) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(Long.valueOf(orderId));
         if (result.isFailure()) {
@@ -128,6 +135,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     }
 
     @Operation(summary = "Search orders", description = "Search for orders using a query string")
+    @Parameter(name = USER, in = ParameterIn.HEADER, description = "User information in JSON format", schema = @Schema(implementation = UserDto.class))
     @APIResponse(responseCode = "200", description = "Orders searched successfully",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OrderDto.class, type = SchemaType.ARRAY)))
     @APIResponse(responseCode = "400", description = "Invalid or empty query",
@@ -136,7 +144,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/search")
     @RunOnVirtualThread
-    public Response search(@RestHeader("User") UserDto userDto, @NotNull @QueryParam("q") String query) {
+    public Response search(@RestHeader(USER) UserDto userDto, @NotNull @QueryParam("q") String query) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.search(query);
         return handleResult(result, 200);

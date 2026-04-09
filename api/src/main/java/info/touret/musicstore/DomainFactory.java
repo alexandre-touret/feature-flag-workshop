@@ -1,5 +1,6 @@
 package info.touret.musicstore;
 
+import info.touret.musicstore.domain.port.DiscountPort;
 import info.touret.musicstore.domain.port.InstrumentPort;
 import info.touret.musicstore.domain.port.OrderPort;
 import info.touret.musicstore.domain.service.InstrumentService;
@@ -23,8 +24,8 @@ public class DomainFactory {
      */
     @ApplicationScoped
     @Produces
-    public InstrumentService createInstrumentService(InstrumentPort instrumentPort) {
-        return new InstrumentService(instrumentPort);
+    public InstrumentService createInstrumentService(InstrumentPort instrumentPort, DiscountPort discountPort) {
+        return new InstrumentService(instrumentPort, discountPort);
     }
 
     /**

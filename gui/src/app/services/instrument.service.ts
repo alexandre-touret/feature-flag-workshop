@@ -1,7 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Instrument } from '../models/instrument.model';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {Instrument} from '../models/instrument.model';
+//TODO: Uncomment
+//import { OpenFeature } from '@openfeature/web-sdk';
 
 @Injectable({
   providedIn: 'root'

@@ -3,6 +3,8 @@ package info.touret.musicstore.domain.service;
 import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.Result;
+import info.touret.musicstore.domain.model.User;
+import info.touret.musicstore.domain.port.DiscountPort;
 import info.touret.musicstore.domain.port.InstrumentPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +18,11 @@ import java.util.List;
 public class InstrumentService {
     private final InstrumentPort instrumentPort;
     private static final Logger LOGGER = LoggerFactory.getLogger(InstrumentService.class);
+    private final DiscountPort discountPort;
 
-    public InstrumentService(InstrumentPort instrumentPort) {
+    public InstrumentService(InstrumentPort instrumentPort, DiscountPort discountPort) {
         this.instrumentPort = instrumentPort;
+        this.discountPort = discountPort;
     }
 
     /**
@@ -92,5 +96,10 @@ public class InstrumentService {
     public Result<Instrument> findById(Long id) {
         LOGGER.debug("Finding instrument by id [{}]", id);
         return instrumentPort.findById(id);
+    }
+
+    public Result<Instrument> applyDiscount(Instrument instrument, User user) {
+        LOGGER.debug("Applying discount to instrument [{}] for user [{}]", instrument, user);
+        return discountPort.applyDiscount(instrument, user);
     }
 }
