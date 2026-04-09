@@ -232,9 +232,8 @@ export class InstrumentListComponent implements OnInit {
 
   private async initFeatureFlags() {
     // TODO: Implement OpenFeature initialization
-
     // For now, manually toggle or keep false
-    this.showDiscountBanner.set(true);
+    this.showDiscountBanner.set(false);
   }
 
   applyFilter(event: Event) {
