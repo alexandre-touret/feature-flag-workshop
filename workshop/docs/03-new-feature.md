@@ -160,14 +160,16 @@ If `showDiscountBanner` is true, the UI displays a "Loyalty Discount Active!" ba
 To test the discount behavior manually:
 
 **1. Enable the Backend discount:**
-1. 📝 Open `api/src/main/java/info/touret/musicstore/infrastructure/featureflag/adapter/DiscountAdapter.java`
-2. 🛠️ Change `boolean manualDiscount = false;` to `boolean manualDiscount = true;`.
-3. 👀 Observe the live-reload happening in your Quarkus console.
+1. 📝Check that it's actually working. Run ``./mvnw quarkus:dev`` in the ``api`` folder otherwise.
+2. 📝 Open `api/src/main/java/info/touret/musicstore/infrastructure/featureflag/adapter/DiscountAdapter.java`
+3. 🛠️ Change `boolean manualDiscount = false;` to `boolean manualDiscount = true;`.
+4. 👀 Observe the live-reload happening in your Quarkus console.
 
 **2. Enable the Frontend UI banner:**
-1. 📝 Open `gui/src/app/pages/instruments/instrument-list/instrument-list.component.ts`
-2. 🛠️ Ensure `this.showDiscountBanner.set(true);` is present and set to `true` inside `initFeatureFlags()`.
-3. 👀 Wait for the Angular dev server to recompile.
+1. 📝Check that it's actually working. Run ``npm start`` in the ``gui`` folder otherwise.
+2. 📝 Open `gui/src/app/pages/instruments/instrument-list/instrument-list.component.ts`
+3. 🛠️ Ensure `this.showDiscountBanner.set(true);` is present and set to `true` inside `initFeatureFlags()`.
+4. 👀 Wait for the Angular dev server to recompile.
 
 ✅ Validate it by checking the Web UI:
 - Open the Music Store Manager GUI in your browser.
