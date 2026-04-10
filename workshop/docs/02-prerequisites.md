@@ -7,6 +7,12 @@ title: 2. Prerequisites
 
 Before you begin this lab, you'll need to set up a few tools on your machine.
 
+:::info
+ℹ️ **What will you do and learn in this chapter?**
+
+You will set up the environment in Github Codespaces and understand how to run it
+:::
+
 ## Required Tools
 
 ### Skills
@@ -129,11 +135,6 @@ You can then open this project in either your local VS Code or directly in your 
 
 ## Environment Setup
 
-> aside positive
-> ℹ️ **What will you do and learn in this chapter?**
->
-> You will set up the environment in Github Codespaces and understand how to run it
-
 ### 🛠  Open Github CodeSpaces
 
 * Log on [GitHub](https://github.com/) and
@@ -219,6 +220,10 @@ http :8080/orders User:'{"firstName":"john","lastName":"Doe","email":"john.doe@g
 #### Backend URL configuration
 
 Pick up the previous URL (e.g., ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev``) and configure the ``gui/src/proxy.conf.json`` file to reach the backend API:
+
+:::warning
+This URL : `https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev` is just an example. Pick up the URL mentioned in the port screen of your Github CodeSpace.
+:::
 
 Update the ``target`` and ``secure`` attributes as following:
 

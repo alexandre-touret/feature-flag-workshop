@@ -112,7 +112,7 @@ Here is a sample of one order entity:
 config:
   layout: elk
 ---
-C4Context
+C4Container
     title High Level Design - Music Store Feature Flag Workshop
 
     Person(customer, "Store Customer", "Browses the platform to buy instruments.")
