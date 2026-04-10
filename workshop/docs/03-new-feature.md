@@ -24,6 +24,38 @@ It consists of two parts:
 ### In the API
 
 The discount logic is currently centralized in the backend through the `DiscountPort` interface. The adapter `DiscountAdapter` implements this behavior.
+
+```mermaid
+---
+config:
+  layout: elk
+---
+classDiagram
+    class InstrumentService {
+        -InstrumentPort instrumentPort
+        -DiscountPort discountPort
+        +InstrumentService(InstrumentPort, DiscountPort)
+        +findInstruments() Result~List~Instrument~~
+        +createInstrument(Instrument) Result~Instrument~
+        +updateInstrument(Instrument) Result~Instrument~
+        +deleteInstrument(Instrument) Result~Boolean~
+        +search(String) Result~List~Instrument~~
+        +findById(Long) Result~Instrument~
+        +applyDiscount(Instrument, User) Result~Instrument~
+    }
+
+    class DiscountPort {
+        <<interface>>
+        +applyDiscount(Instrument, User) Result~Instrument~
+    }
+
+    class DiscountAdapter {
+        +applyDiscount(Instrument, User) Result~Instrument~
+    }
+
+    InstrumentService --> DiscountPort : uses
+    DiscountAdapter ..> DiscountPort : implements
+```
 Currently, it has a hardcoded variable (`manualDiscount`) set to `false`, effectively bypassing the discount logic and returning the instrument with its original price.
 
 ```java
@@ -41,6 +73,58 @@ return Result.success(instrument);
 When activated, it sets the discounted price to `originalPrice * 0.9` and stores the original price in the `originalPrice` field of the returned instrument by utilizing the `instrument.withDiscount()` method.
 
 The `InstrumentResource` handles retrieving the user contextual information via the `User` HTTP Header. It then delegates the logic to `InstrumentService.applyDiscount(Instrument, User)` before returning any results to the client.
+
+
+#### The sequence diagram
+
+```mermaid
+---
+config:
+  layout: elk
+---
+sequenceDiagram
+    actor Client
+    participant GUI as InstrumentListComponent
+    participant API as InstrumentResource
+    participant Service as InstrumentService
+    participant Adapter as InstrumentAdapter
+    participant DB as InstrumentRepository
+    participant Discount as DiscountAdapter
+
+    Client->>GUI: GET instruments
+    GUI->>API: GET /instruments (with User header)
+    activate API
+    API->>Service: findInstruments()
+    activate Service
+
+    Service->>Adapter: findAll()
+    activate Adapter
+    Adapter->>DB: listAll()
+    activate DB
+    DB-->>Adapter: List<InstrumentEntity>
+    deactivate DB
+    Adapter-->>Service: Result<List<Instrument>>
+    deactivate Adapter
+
+    Service-->>API: Result<List<Instrument>>
+    deactivate Service
+
+    loop For each Instrument
+        API->>Service: applyDiscount(instrument, user)
+        activate Service
+        Service->>Discount: applyDiscount(instrument, user)
+        activate Discount
+        Note right of Discount: Applies logic based on Feature Flag/Manual toggle
+        Discount-->>Service: Result<Instrument>
+        deactivate Discount
+        Service-->>API: Result<Instrument>
+        deactivate Service
+    end
+
+    API-->>Client: 200 OK (List<InstrumentDto>)
+    deactivate API
+```
+
 
 ### In the GUI
 
