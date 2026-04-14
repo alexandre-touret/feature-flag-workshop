@@ -1,11 +1,11 @@
 package info.touret.musicstore.domain.model;
 
-public record User(String firstname, String lastname, String email, String country) {
+public record User(String firstName, String lastName, String email, String country) {
     @Override
     public String toString() {
         return "User{" +
-                "firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", country='" + country + '\'' +
                 '}';
