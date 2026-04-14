@@ -345,9 +345,9 @@ The logger will help us see what is provided through the details:
 Next, change the flag-key to ``wrong-discount-enabled`` :
 
 ```java
-        var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("wrong-discount-enabled", false);
-        LOGGER.info(evaluationDetails.toString());
-        boolean isDiscountEnabled = evaluationDetails.getValue();
+var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("wrong-discount-enabled", false);
+LOGGER.info(evaluationDetails.toString());
+boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
 
 You should see in the console such an output:
@@ -392,9 +392,9 @@ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.
 Finally, restore the good flag key to ``discount-enabled``:
 
 ```java
-        var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("discount-enabled", false);
-        LOGGER.info(evaluationDetails.toString());
-        boolean isDiscountEnabled = evaluationDetails.getValue();
+var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("discount-enabled", false);
+LOGGER.info(evaluationDetails.toString());
+boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
 
 ## FlagD
