@@ -285,7 +285,7 @@ public class OpenFeatureFactory {
 ./mvnw quarkus:dev
 ```
 
-👀 Validate your unit/integration tests typing `r` to resume testing.
+👀 Validate your unit/integration tests typing `'r'` to resume testing.
 
 You should see this output in your console:
 
@@ -397,10 +397,105 @@ LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
 
-## FlagD
+## Flagd
 
-Test location (evaluation context)
+OpenFeature provides many [SDK to interact with different feature flag providers](https://openfeature.dev/ecosystem?instant_search%5BrefinementList%5D%5Btype%5D%5B0%5D=Provider).
 
-Utilisation du contexte utilisateur avec EvaluationContextBuilder()
+We will now improve our application moving our in memory provider to [Flagd](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/flagd).
 
-Test Detailed return info
+It provides different ways to retrieve and resolve flags:
+- Through a [RPC server](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/flagd#configuration-and-usage)
+- Through an internally managed process
+- From a file
+
+During this workshop we will use the offline mode with a configuration file.
+
+🛠️ Go to the `OpenFeatureFactory` class and update the ``createProvider()`` method as below:
+
+From:
+
+```java
+private FeatureProvider createProvider() {
+    Map<String, Flag<?>> flags = Map.of(
+            // Creates a flag to enable discounts
+            "discount-enabled", Flag.builder()
+                    .variant("on", true)
+                    .variant("off", false)
+                    .defaultVariant("on")
+                    .build(),
+            // Creates a flag to show the welcome message
+            "welcome-message", Flag.builder()
+                    .variant("greeting", "Bienvenue sur notre boutique !")
+                    .variant("empty", "")
+                    .defaultVariant("greeting")
+                    .build()
+    );
+    return new InMemoryProvider(flags);
+}
+```
+
+To
+
+```java
+private FeatureProvider createProvider() {
+    return new FlagdProvider(
+            FlagdOptions.builder()
+                    .resolverType(Config.Resolver.FILE)
+                    .offlineFlagSourcePath(Thread.currentThread().getContextClassLoader().getResource("/flags.flagd.json").getPath())
+                    .build());
+}
+```
+This setup relies on a file located to ``src/main/resources/flags.flagd.json``.
+
+We can now push the former rules to this file as following:
+
+```json
+{
+  "flags": {
+    "welcome-message": {
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "state": "ENABLED",
+      "defaultVariant": "on"
+    },
+    "discount-enabled": {
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "state": "ENABLED",
+      "defaultVariant": "on"
+    }
+  }
+}
+
+```
+
+Save it and restart the integration tests.
+
+You can either type `'r'` on the Quarkus Dev environment and get the following output:
+
+```bash
+--
+All 56 tests are passing (0 skipped), 56 tests were run in 1931ms. Tests completed at 16:51:58.
+```
+If it doesn't work, feel free to restart it.
+
+You can also run the following command:
+
+```bash
+./mvnw clean verify
+```
+
+## Evaluation Context
+
+Beyond just a static true/false flag, OpenFeature provides the ability to evaluate the flag with different parameters.
+These ones may be global at the application or dependent of the current transactions.
+
+For instance, we may set a global static parameter which enable a feature for all the users and a client parameter to enable a feature taking into account a session parameter such as the country of the current user.
+
+We will implement the latter now.
+
+
