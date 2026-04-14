@@ -1,5 +1,6 @@
 package info.touret.musicstore.infrastructure.featureflag.adapter;
 
+import dev.openfeature.sdk.MutableContext;
 import dev.openfeature.sdk.OpenFeatureAPI;
 import info.touret.musicstore.domain.model.Instrument;
 import info.touret.musicstore.domain.model.Result;
@@ -29,7 +30,9 @@ public class DiscountAdapter implements DiscountPort {
 //            double discountedPrice = originalPrice * 0.9; // 10% discount
 //            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
 //        }
-        var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("discount-enabled", false);
+        var openFeatureAPIClient = this.openFeatureAPI.getClient();
+        openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountry", user.country()));
+        var evaluationDetails = openFeatureAPIClient.getBooleanDetails("discount-enabled", false);
         LOGGER.info(evaluationDetails.toString());
         boolean isDiscountEnabled = evaluationDetails.getValue();
         if (isDiscountEnabled) {

@@ -14,7 +14,21 @@
         "off": false
       },
       "state": "ENABLED",
-      "defaultVariant": "on"
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "==": [
+              {
+                "var": "clientCountry"
+              },
+              "FRANCE"
+            ]
+          },
+          "on",
+          null
+        ]
+      }
     }
   }
 }
