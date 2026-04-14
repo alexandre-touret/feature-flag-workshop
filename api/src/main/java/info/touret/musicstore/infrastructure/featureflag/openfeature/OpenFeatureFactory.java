@@ -1,17 +1,16 @@
 package info.touret.musicstore.infrastructure.featureflag.openfeature;
 
+import dev.openfeature.contrib.providers.flagd.Config;
+import dev.openfeature.contrib.providers.flagd.FlagdOptions;
+import dev.openfeature.contrib.providers.flagd.FlagdProvider;
 import dev.openfeature.sdk.FeatureProvider;
 import dev.openfeature.sdk.OpenFeatureAPI;
-import dev.openfeature.sdk.providers.memory.Flag;
-import dev.openfeature.sdk.providers.memory.InMemoryProvider;
 import io.quarkus.arc.Arc;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * OpenFeature Factory CLass
@@ -25,24 +24,14 @@ public class OpenFeatureFactory {
      * Creates the provider
      *
      * @return The {@link FeatureProvider} instance
-     * @see dev.openfeature.sdk.providers.memory.InMemoryProvider
+     * @see FlagdProvider
      */
     private FeatureProvider createProvider() {
-        Map<String, Flag<?>> flags = Map.of(
-                // Creates a flag to enable discounts
-                "discount-enabled", Flag.builder()
-                        .variant("on", true)
-                        .variant("off", false)
-                        .defaultVariant("on")
-                        .build(),
-                // Creates a flag to show the welcome message
-                "welcome-message", Flag.builder()
-                        .variant("greeting", "Bienvenue sur notre boutique !")
-                        .variant("empty", "")
-                        .defaultVariant("greeting")
-                        .build()
-        );
-        return new InMemoryProvider(flags);
+        return new FlagdProvider(
+                FlagdOptions.builder()
+                        .resolverType(Config.Resolver.FILE)
+                        .offlineFlagSourcePath(Thread.currentThread().getContextClassLoader().getResource("/flags.flagd.json").getPath())
+                        .build());
     }
 
     /**

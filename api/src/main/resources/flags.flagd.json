@@ -1,0 +1,20 @@
+{
+  "flags": {
+    "welcome-message": {
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "state": "ENABLED",
+      "defaultVariant": "on"
+    },
+    "discount-enabled": {
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "state": "ENABLED",
+      "defaultVariant": "on"
+    }
+  }
+}
