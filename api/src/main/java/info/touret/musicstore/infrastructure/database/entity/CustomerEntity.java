@@ -16,9 +16,9 @@ public class CustomerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotEmpty
-    private String firstname;
+    private String firstName;
     @NotEmpty
-    private String lastname;
+    private String lastName;
     @Email
     private String email;
 
@@ -29,10 +29,10 @@ public class CustomerEntity {
     public CustomerEntity() {
     }
 
-    public CustomerEntity(Long id, String firstname, String lastname, String email, AddressEntity address) {
+    public CustomerEntity(Long id, String firstName, String lastName, String email, AddressEntity address) {
         this.id = id;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.address = address;
     }
@@ -45,20 +45,20 @@ public class CustomerEntity {
         this.id = id;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setFirstName(String firstname) {
+        this.firstName = firstname;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setLastName(String lastname) {
+        this.lastName = lastname;
     }
 
     public String getEmail() {
