@@ -29,7 +29,7 @@ public class DiscountAdapter implements DiscountPort {
 //            double discountedPrice = originalPrice * 0.9; // 10% discount
 //            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
 //        }
-        var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("wrong-discount-enabled", false);
+        var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("discount-enabled", false);
         LOGGER.info(evaluationDetails.toString());
         boolean isDiscountEnabled = evaluationDetails.getValue();
         if (isDiscountEnabled) {
