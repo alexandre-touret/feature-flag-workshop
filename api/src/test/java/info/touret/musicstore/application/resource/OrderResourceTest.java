@@ -248,7 +248,7 @@ class OrderResourceTest {
     }
 
     /// Test 12: Modify customer details in an order.
-    /// Updates the customer's lastname and email for order 10.
+    /// Updates the customer's lastName and email for order 10.
     @Order(12)
     @Test
     void should_modify_customer_in_order_successfully() {
@@ -272,7 +272,7 @@ class OrderResourceTest {
                 .put("/orders/10")
                 .then()
                 .statusCode(200)
-                .assertThat().body("customer.lastname", Is.is("Updated"))
+                .assertThat().body("customer.lastName", Is.is("Updated"))
                 .assertThat().body("customer.email", Is.is("judy.updated@test.com"));
     }
 
@@ -281,7 +281,7 @@ class OrderResourceTest {
     @Order(13)
     @Test
     void should_fail_when_order_data_is_invalid() {
-        // Case 1: Empty customer firstname
+        // Case 1: Empty customer firstName
         var invalidCustomer = new CustomerDto(10L, "", "Martinez", "judy@test.com", addressDto);
         var inst1 = new InstrumentDto(1L, "Stratocaster", "FEN-STR-01", "Fender", 1200.0, "Classic Stratocaster", InstrumentTypeDto.GUITAR);
 
