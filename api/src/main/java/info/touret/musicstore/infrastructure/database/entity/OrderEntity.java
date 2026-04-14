@@ -14,7 +14,7 @@ import static jakarta.persistence.CascadeType.*;
  */
 @Entity
 @Table(name = "orders")
-@NamedQuery(name = "OrderEntity.search", query = "from OrderEntity where cast(reference as String) LIKE concat('%',?1,'%') OR lower(customer.firstname) LIKE lower(concat('%',?1,'%')) OR lower(customer.lastname) LIKE lower(concat('%',?1,'%'))")
+@NamedQuery(name = "OrderEntity.search", query = "from OrderEntity where cast(reference as String) LIKE concat('%',?1,'%') OR lower(customer.firstName) LIKE lower(concat('%',?1,'%')) OR lower(customer.lastName) LIKE lower(concat('%',?1,'%'))")
 public class OrderEntity {
 
     @Id
