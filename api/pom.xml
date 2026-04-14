@@ -97,8 +97,6 @@
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit-junit5.version}</version>
         </dependency>
-        <!--
-        TODO : uncomment
         <dependency>
             <groupId>dev.openfeature</groupId>
             <artifactId>sdk</artifactId>
@@ -109,7 +107,6 @@
             <artifactId>flagd</artifactId>
             <version>0.11.20</version>
         </dependency>
-        -->
     </dependencies>
 
     <build>
