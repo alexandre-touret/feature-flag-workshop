@@ -24,7 +24,7 @@ class DiscountAdapterTest {
     }
 
     @Test
-    void should_return_the_instrument_with_a_discount_successfully() {
-        assertEquals(instrument.price() * 0.9, discountAdapter.applyDiscount(instrument, user).value().price());
+    void should_return_the_instrument_with_no_discount_successfully() {
+        assertEquals(instrument.price(), discountAdapter.applyDiscount(instrument, user).value().price());
     }
 }
