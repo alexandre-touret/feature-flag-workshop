@@ -27,4 +27,11 @@ class DiscountAdapterTest {
     void should_return_the_instrument_with_a_discount_successfully() {
         assertEquals(instrument.price() * 0.9, discountAdapter.applyDiscount(instrument, user).value().price());
     }
+
+
+    @Test
+    void should_return_the_instrument_with_no_discount_successfully() {
+        var userGB = new User("John", "Doe", "john.doe@example.com", "FRANCE");
+        assertEquals(instrument.price() * 0.9, discountAdapter.applyDiscount(instrument, userGB).value().price());
+    }
 }
