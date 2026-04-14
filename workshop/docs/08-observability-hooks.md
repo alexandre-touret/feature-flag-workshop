@@ -6,3 +6,7 @@ title: 8. Observability & Hooks
 *   Implementation:
     *   Adding Hooks to log each evaluation.
     *   "Graceful Degradation" management: what to do if FlagSmith is unreachable? (Default value vs Cache).
+
+
+
+Utilisatoin des hooks pour PII (sanitisation)
