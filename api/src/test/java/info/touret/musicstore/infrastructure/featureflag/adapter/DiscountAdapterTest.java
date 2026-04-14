@@ -24,14 +24,20 @@ class DiscountAdapterTest {
     }
 
     @Test
-    void should_return_the_instrument_with_a_discount_successfully() {
+    void should_return_the_instrument_with_a_10P_discount_successfully() {
         assertEquals(instrument.price() * 0.9, discountAdapter.applyDiscount(instrument, user).value().price());
     }
 
 
     @Test
-    void should_return_the_instrument_with_no_discount_successfully() {
-        var userGB = new User("John", "Doe", "john.doe@example.com", "FRANCE");
-        assertEquals(instrument.price() * 0.9, discountAdapter.applyDiscount(instrument, userGB).value().price());
+    void should_return_the_instrument_with_a_20P_discount_successfully() {
+        var userGB = new User("John", "Doe", "john.doe@example.com", "UK");
+        assertEquals(instrument.price() * 0.8, discountAdapter.applyDiscount(instrument, userGB).value().price());
+    }
+
+    @Test
+    void should_return_the_instrument_with_a_50P_discount_successfully() {
+        var userGermany = new User("John", "Doe", "john.doe@example.com", "GERMANY");
+        assertEquals(instrument.price() * 0.5, discountAdapter.applyDiscount(instrument, userGermany).value().price());
     }
 }

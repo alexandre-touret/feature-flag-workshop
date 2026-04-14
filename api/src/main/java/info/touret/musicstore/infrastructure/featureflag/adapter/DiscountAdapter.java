@@ -37,7 +37,8 @@ public class DiscountAdapter implements DiscountPort {
         boolean isDiscountEnabled = evaluationDetails.getValue();
         if (isDiscountEnabled) {
             double originalPrice = instrument.price();
-            double discountedPrice = originalPrice * 0.9; // 10% discount
+            double discountAmount = openFeatureAPIClient.getDoubleValue("discount-amount", 0.1);
+            double discountedPrice = originalPrice * (1.0 - discountAmount);
             return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
         }
         return Result.success(instrument);

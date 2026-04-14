@@ -18,14 +18,50 @@
       "targeting": {
         "if": [
           {
+            "in": [
+              {
+                "var": "clientCountry"
+              },
+              [
+                "FRANCE",
+                "GERMANY",
+                "UK"
+              ]
+            ]
+          },
+          "on",
+          null
+        ]
+      }
+    },
+    "discount-amount": {
+      "state": "ENABLED",
+      "variants": {
+        "10-percent": 0.1,
+        "20-percent": 0.2,
+        "50-percent": 0.5
+      },
+      "defaultVariant": "10-percent",
+      "targeting": {
+        "if": [
+          {
             "==": [
               {
                 "var": "clientCountry"
               },
-              "FRANCE"
+              "GERMANY"
             ]
           },
-          "on",
+          "50-percent",
+          {
+            "==": [
+              {
+                "var": "clientCountry"
+              },
+              "UK"
+            ]
+          },
+          "20-percent",
           null
         ]
       }
