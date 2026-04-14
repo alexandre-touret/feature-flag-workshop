@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  */
 @JsonRootName("Customer")
 @Schema(name = "Customer", description = "Customer data")
-public record CustomerDto(@Min(0) Long id, @NotEmpty String firstname, @NotEmpty String lastname, @NotEmpty String email,
+public record CustomerDto(@Min(0) Long id, @NotEmpty String firstName, @NotEmpty String lastName,
+                          @NotEmpty String email,
                           @NotNull AddressDto address) {
 }
