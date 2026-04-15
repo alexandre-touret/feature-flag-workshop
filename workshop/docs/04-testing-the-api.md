@@ -80,7 +80,9 @@ With OpenFeature, we get a standardized API decoupling the feature flag reposito
 
 ![with OpenFeature](./assets/feature_flag_with_openfeature.png)
 
+<div style={{textAlign: 'center'}}>
 _Source: https://openfeature.dev/docs/reference/intro_
+</div>
 
 🔗 **Learn more:** [OpenFeature Architecture & Concepts](https://openfeature.dev/docs/reference/intro)
 
@@ -90,19 +92,19 @@ Let's dig into the Evaluation API. For this first try, we will update the `Disco
 
 First, enable the OpenFeature libraries in your classpath in the `pom.xml` file.
 
-Uncomment this section:
+📝 Uncomment this section:
 
 ```xml
-   <dependency>
-            <groupId>dev.openfeature</groupId>
-            <artifactId>sdk</artifactId>
-            <version>1.20.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.openfeature.contrib.providers</groupId>
-            <artifactId>flagd</artifactId>
-            <version>0.11.20</version>
-        </dependency>
+<dependency>
+    <groupId>dev.openfeature</groupId>
+    <artifactId>sdk</artifactId>
+    <version>1.20.1</version>
+</dependency>
+<dependency>
+    <groupId>dev.openfeature.contrib.providers</groupId>
+    <artifactId>flagd</artifactId>
+    <version>0.11.20</version>
+</dependency>
 ```
 
 🛠️ Refresh your editor.
@@ -112,22 +114,22 @@ Uncomment this section:
 🛠️ Add a new attribute to get the `OpenFeatureAPI` instance and update the constructor as follows:
 
 ```java
-    private final OpenFeatureAPI openFeatureAPI;
+private final OpenFeatureAPI openFeatureAPI;
 
-    public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
-        this.openFeatureAPI = openFeatureAPI;
-    }
+public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
+    this.openFeatureAPI = openFeatureAPI;
+}
 ```
 
-This way, the `OpenFeatureAPI` is automatically provided by CDI.
+ℹ️ This way, the `OpenFeatureAPI` is automatically provided by CDI.
 
-🛠 Update the `import` declaration as well:
+📝 Update the `import` declaration as well:
 
 ```java
 import dev.openfeature.sdk.OpenFeatureAPI;
 ```
 
-Then, comment out the existing code and add the new one using OpenFeature:
+📝 Then, comment out the existing code and add the new one using OpenFeature:
 
 ```java
     @Override
@@ -136,6 +138,7 @@ Then, comment out the existing code and add the new one using OpenFeature:
         // For now, let's keep it simple (manually toggle for testing if needed)
 //        boolean manualDiscount = false; // Toggle to true to test UI
 //        if (manualDiscount) {
+//        private static final Logger LOGGER = LoggerFactory.getLogger(DiscountAdapter.class);
 //            double originalPrice = instrument.price();
 //            double discountedPrice = originalPrice * 0.9; // 10% discount
 //            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
@@ -163,10 +166,12 @@ import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.model.User;
 import info.touret.musicstore.domain.port.DiscountPort;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class DiscountAdapter implements DiscountPort {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscountAdapter.class);
     private final OpenFeatureAPI openFeatureAPI;
 
     public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
@@ -193,13 +198,13 @@ public class DiscountAdapter implements DiscountPort {
     }
 }
 ```
-At this point, your code won't work at all because we haven't declared the factory and the provider yet.
+ℹ️ At this point, your code won't work at all because we haven't declared the factory and the provider yet.
 
 ## In-Memory Provider
 
 ### First Implementation
 
-For our first try with OpenFeature, we will use the simplest provider: the [InMemoryProvider](https://hexdocs.pm/open_feature/OpenFeature.Provider.InMemory.html). It is only available for testing purposes.
+ℹ️ For our first try with OpenFeature, we will use the simplest provider: the [InMemoryProvider](https://hexdocs.pm/open_feature/OpenFeature.Provider.InMemory.html). It is only available for testing purposes.
 
 🛠️ Create the class `src/main/java/info/touret/musicstore/infrastructure/featureflag/openfeature/OpenFeatureFactory.java` with the following content:
 
@@ -279,7 +284,7 @@ public class OpenFeatureFactory {
 }
 ```
 
-Go to the ``DiscountAdapterTest`` class and update the integration test.
+📝 Go to the ``DiscountAdapterTest`` class and update the integration test.
 
 From:
 
@@ -302,12 +307,12 @@ void should_return_the_instrument_with_a_discount_successfully() {
 🛠️ Restart your Quarkus Dev environment by typing `Ctrl+C` in your console and restarting the command:
 
 ```bash
-./mvnw quarkus:dev
+$ ./mvnw quarkus:dev
 ```
 
-👀 Validate your unit/integration tests by typing `r` to resume testing.
+✅ Validate your unit/integration tests by typing `r` to resume testing.
 
-You should see this output in your console:
+👀 You should see this output in your console:
 
 ```bash
 --
@@ -317,32 +322,32 @@ All 56 tests are passing (0 skipped), 56 tests were run in 11808ms. Tests comple
 🛠️ You can also run this API call with the `httpie` tool in another terminal:
 
 ```bash
-http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
 ```
 
-You should see the same content as before:
+👀 You should see the same content as before:
 
 ```json
- {
-        "description": "MIDI Controller / Sequencer",
-        "hasDiscount": true,
-        "id": 100,
-        "manufacturer": "Arturia",
-        "name": "KeyStep Pro",
-        "originalPrice": 450.0,
-        "price": 405.0,
-        "reference": "ART-KEY-01",
-        "type": "PIANO"
-    }
+{
+   "description": "MIDI Controller / Sequencer",
+   "hasDiscount": true,
+   "id": 100,
+   "manufacturer": "Arturia",
+   "name": "KeyStep Pro",
+   "originalPrice": 450.0,
+   "price": 405.0,
+   "reference": "ART-KEY-01",
+   "type": "PIANO"
+}
 ```
 
 ### Getting More Details
 
-[OpenFeature also brings an API to get more details about the evaluation](https://openfeature.dev/docs/reference/concepts/evaluation-api/#detailed-evaluation). We will see how it matters to make it fully observable in the Observability Chapter.
+ℹ️ [OpenFeature also brings an API to get more details about the evaluation](https://openfeature.dev/docs/reference/concepts/evaluation-api/#detailed-evaluation). We will see how it matters to make it fully observable in the Observability Chapter.
 
 Let's see how to put it in place:
 
-🛠️ Update the code located in the method `applyDiscount` of the `DiscountAdapter` class:
+📝 Update the code located in the method `applyDiscount` of the `DiscountAdapter` class:
 
 From:
 
@@ -358,13 +363,13 @@ LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
 
-The logger will help us see what is provided through the details:
+👀 The logger will help us see what is provided through the details:
 
 ```bash
 2026-04-13 19:32:23,833 INFO  [info.touret.musicstore.infrastructure.featureflag.adapter.DiscountAdapter] (main) FlagEvaluationDetails(flagKey=discount-enabled, value=true, variant=on, reason=STATIC, errorCode=null, errorMessage=null, flagMetadata=dev.openfeature.sdk.ImmutableMetadata@3b)
 ```
 
-Next, change the flag key to `wrong-discount-enabled`:
+📝 Next, change the flag key to `wrong-discount-enabled`:
 
 ```java
 var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("wrong-discount-enabled", false);
@@ -372,7 +377,7 @@ LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
 
-You should see output like this in the console:
+👀 You should see output like this in the console:
 
 ```bash
  mapstruct.suppressGeneratorVersionInfoComment, mapstruct.defaultComponentModel, mapstruct.suppressGeneratorTimestamp]', line -1 in [unknown source]
@@ -396,12 +401,12 @@ info.touret.musicstore.infrastructure.featureflag.adapter.DiscountAdapterTest#sh
 2026-04-14 07:50:15,421 ERROR [io.quarkus.test] (Test runner thread) >>>>>>>>>>>>>>>>>>>> 1 TEST FAILED <<<<<<<<<<<<<<<<<<<<
 ```
 
-It means the flag key wasn't found, and the default value was taken into account.
+ℹ️ It means the flag key wasn't found, and the default value was taken into account.
 
-If you call the API again using this command:
+🛠️ If you call the API again using this command:
 
 ```bash
-http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
 ```
 
 👀 You will see the details of the feature flag value resolution:
@@ -411,7 +416,7 @@ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.
 2026-04-14 07:53:13,694 DEBUG [info.touret.musicstore.domain.service.InstrumentService] (quarkus-virtual-thread-0) Applying discount to instrument [Instrument{id=100, name='KeyStep Pro', reference='ART-KEY-01', manufacturer='Arturia', price=450.0, description='MIDI Controller / Sequencer', type=PIANO}] for user [User{firstname='null', lastname='null', email='john.doe@gmail.com', country='FR'}]
 ```
 
-Finally, restore the correct flag key to `discount-enabled`:
+📝 Finally, restore the correct flag key to `discount-enabled`:
 
 ```java
 var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("discount-enabled", false);
@@ -421,7 +426,7 @@ boolean isDiscountEnabled = evaluationDetails.getValue();
 
 ## Flagd
 
-OpenFeature provides many [SDKs to interact with different feature flag providers](https://openfeature.dev/ecosystem?instant_search%5BrefinementList%5D%5Btype%5D%5B0%5D=Provider).
+ℹ️ OpenFeature provides many [SDKs to interact with different feature flag providers](https://openfeature.dev/ecosystem?instant_search%5BrefinementList%5D%5Btype%5D%5B0%5D=Provider).
 
 We will now improve our application by moving from our in-memory provider to [Flagd](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/flagd).
 
@@ -432,7 +437,7 @@ It provides different ways to retrieve and resolve flags:
 
 During this workshop, we will use the offline mode with a configuration file.
 
-🛠️ Go to the `OpenFeatureFactory` class and update the `createProvider()` method as shown below:
+📝 Go to the `OpenFeatureFactory` class and update the `createProvider()` method as shown below:
 
 From:
 
@@ -467,9 +472,9 @@ private FeatureProvider createProvider() {
                     .build());
 }
 ```
-This setup relies on a file located at `src/main/resources/flags.flagd.json`.
+ℹ️ This setup relies on a file located at `src/main/resources/flags.flagd.json`.
 
-We can now push the former rules to this file as follows:
+📝 We can now push the former rules to this file as follows:
 
 ```json
 {
@@ -495,36 +500,36 @@ We can now push the former rules to this file as follows:
 
 ```
 
-Save it and restart the integration tests.
+🛠️ Save it and restart the integration tests.
 
-You can either type `'r'` in the Quarkus Dev environment and get the following output:
+👀 You can either type `'r'` in the Quarkus Dev environment and get the following output:
 
 ```bash
 --
 All 56 tests are passing (0 skipped), 56 tests were run in 1931ms. Tests completed at 16:51:58.
 ```
-If it doesn't work, feel free to restart it.
+ℹ️ If it doesn't work, feel free to restart it.
 
-You can also run the following command:
+🛠️ You can also run the following command:
 
 ```bash
-./mvnw clean verify
+$ ./mvnw clean verify
 ```
 
 ## Evaluation Context
 
-Beyond just a static true/false flag, OpenFeature provides the ability to evaluate a flag with different parameters.
-These parameters may be global to the application or dependent on current transactions.
+ℹ️ Beyond just a static true/false flag, OpenFeature provides the ability to evaluate a flag with different parameters.
+These parameters may be global (e.g., the application's version) to the application or dependent on current transactions.
 
 For instance, we may set a global static parameter that enables a feature for all users, and a client parameter to enable a feature taking into account a session parameter such as the country of the current user.
 
 :::tip
-If you want more information, feel free to check out [the official documentation](https://openfeature.dev/docs/reference/concepts/evaluation-context/).
+ℹ️ If you want more information, feel free to check out [the official documentation](https://openfeature.dev/docs/reference/concepts/evaluation-context/).
 :::
 
 We will now enable the discount for users located in France.
 
-Go to the `DiscountAdapter` class and update the method `applyDiscount()` as follows:
+📝 Go to the `DiscountAdapter` class and update the method `applyDiscount()` as follows:
 
 From:
 
@@ -540,7 +545,7 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountr
 var evaluationDetails = openFeatureAPIClient.getBooleanDetails("discount-enabled", false);
 ```
 
-Then go to the `src/main/resources/flags.flagd.json` file and update the `discount-enabled` flag with the following content:
+📝 Then go to the `src/main/resources/flags.flagd.json` file and update the `discount-enabled` flag with the following content:
 
 ```json
 "discount-enabled": {
@@ -567,7 +572,7 @@ Then go to the `src/main/resources/flags.flagd.json` file and update the `discou
 }
 ```
 
-**Short Explanation**
+ℹ️ **Short Explanation**
 - The Flagd targeting model evaluates the feature flag against the context broadcasted through the `MutableContext` class.
 - Here, the `discount-enabled` flag is only enabled if the targeting criteria (i.e., `clientCountry`) is equal to `FRANCE`.
 - The targeting structure is based on [JsonLogic](https://jsonlogic.com/). Below is the [ `if` clause syntax](https://jsonlogic.com/operations.html#if):
@@ -583,12 +588,12 @@ Then go to the `src/main/resources/flags.flagd.json` file and update the `discou
 When the targeting rule returns `null`, Flagd ignores the rule and automatically returns the default variant (i.e., `off`).
 
 
-Normally at this point, your integration tests keep working.
+ℹ️ Normally at this point, your integration tests keep working.
 Let's update the `DiscountAdapterTest` class with an additional test to check if the country is properly taken into account.
 
-Go to the `DiscountAdapterTest` class.
+📝 Go to the `DiscountAdapterTest` class.
 
-Add the following test:
+📝 Add the following test:
 
 ```java
 @Test
@@ -598,23 +603,23 @@ void should_return_the_instrument_with_no_discount_successfully() {
 }
 ```
 
-You can run the tests again and check out the following output:
+🛠️ You can run the tests again and check out the following output:
 
 ```bash
 ---
 All 57 tests are passing (0 skipped), 57 tests were run in 2018ms. Tests completed at 17:14:53.
 ```
 
-We will go further with targeting rules in the [Targeting chapter](06-targeting.md).
+ℹ️ We will go further with targeting rules in the [Targeting chapter](06-targeting.md).
 
 
 ### Dynamic Configuration (beyond booleans)
 
-Feature flags aren’t just ``true``/``false``.
+ℹ️ Feature flags aren’t just ``true``/``false``.
 We can also provide dynamic values.
 In this workshop we will provide the discount amount through a targeting rule.
 
-Go to the ``src/main/resources/flags.flagd.json`` file, add a second flag as following:
+📝 Go to the ``src/main/resources/flags.flagd.json`` file, add a second flag as following:
 
 ```json
 "discount-amount": {
@@ -628,7 +633,7 @@ Go to the ``src/main/resources/flags.flagd.json`` file, add a second flag as fol
 }
 ```
 
-Go then to the ``DiscountAdapter`` class and update the ``applyDiscount()`` method with this content:
+📝 Go then to the ``DiscountAdapter`` class and update the ``applyDiscount()`` method with this content:
 
 ```java
 if (isDiscountEnabled) {
@@ -639,32 +644,32 @@ if (isDiscountEnabled) {
 }
 ```
 
-From now on, once the ``discount`` feature is enabled, we can get the discount value using the method ``getDoubleValue()``.
+ℹ️ From now on, once the ``discount`` feature is enabled, we can get the discount value using the method ``getDoubleValue()``.
 
-Next, validate it running the integration tests.
+✅ Next, validate it running the integration tests.
 
-You can either type `'r'` in the Quarkus Dev environment and get the following output:
+👀 You can either type `'r'` in the Quarkus Dev environment and get the following output:
 
 ```bash
 --
 All 57 tests are passing (0 skipped), 57 tests were run in 9704ms. Tests completed at 18:18:31.
 ```
-If it doesn't work, feel free to restart it.
+ℹ️ If it doesn't work, feel free to restart it.
 
-You can also run the following command:
+🛠️ You can also run the following command:
 
 ```bash
-./mvnw clean verify
+$ ./mvnw clean verify
 ```
 
-Now let's enhance our targeting rules. We will implement this rule sets:
+ℹ️ Now let's enhance our targeting rules. We will implement this rule sets:
 - Discounts are only available for people from FRANCE, UK or GERMANY
 - Users from GERMANY get a 50% discount.
 - Users from UK get a 20% discount
 - Everyone else falls back to the default 10% discount
 
 
-Update the ``src/main/resources/flags.flagd.json`` file with the following content:
+📝 Update the ``src/main/resources/flags.flagd.json`` file with the following content:
 
 ```json
 {
@@ -739,7 +744,7 @@ Update the ``src/main/resources/flags.flagd.json`` file with the following conte
 }
 ```
 
-Next, in the ``DiscountAdapterTest`` class, remove the existing tests and add those ones:
+📝 Next, in the ``DiscountAdapterTest`` class, remove the existing tests and add those ones:
 
 ```java
 @Test
@@ -761,9 +766,10 @@ void should_return_the_instrument_with_a_50P_discount_successfully() {
 }
 ```
 
+🛠️ You can run the tests again and check out the new tests added run correctly.
 
 :::warning
-This example is only for testing purpose and to illustrate the capabilities of OpenFeature.
+ℹ️ This example is only for testing purpose and to illustrate the capabilities of OpenFeature.
 
 Obviously, bringing these kind of logic into a another system may occur some inconsistency and potential bugs.
 :::
