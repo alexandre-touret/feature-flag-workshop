@@ -5,6 +5,8 @@ import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.model.User;
 import info.touret.musicstore.domain.port.DiscountPort;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO: Chapter 3 - Uncomment to use OpenFeature
 // import dev.openfeature.sdk.Client;
@@ -13,13 +15,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class DiscountAdapter implements DiscountPort {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscountAdapter.class);
     @Override
     public Result<Instrument> applyDiscount(Instrument instrument, User user) {
         // TODO: Chapter 3 - Implement this with OpenFeature
         // For now, let's keep it simple (manually toggle for testing if needed)
         boolean manualDiscount = false; // Toggle to true to test UI
         if (manualDiscount) {
+            LOGGER.debug("Applying Discount");
             double originalPrice = instrument.price();
             double discountedPrice = originalPrice * 0.9; // 10% discount
             return Result.success(instrument.withDiscount(discountedPrice, originalPrice));

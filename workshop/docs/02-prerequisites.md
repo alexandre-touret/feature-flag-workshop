@@ -71,7 +71,7 @@ $ docker version
 
 You **MUST** have sat up these tools first:
 
-* [Java 21+](https://adoptium.net/temurin/releases/?version=21)
+* [Java 25+](https://adoptium.net/temurin/releases/?version=25)
 * [Maven 3.9](https://www.maven.apache.org/)
 * [Docker](https://docs.docker.com/)
 * [NodeJS/NPM](https://nodejs.org/en/)
@@ -83,20 +83,20 @@ You **MUST** have sat up these tools first:
 
 ```jshelllanguage
 $ java -version
-openjdk version "21.0.1" 2023 - 10 - 17 LTS
-OpenJDK Runtime Environment Temurin-21.0.1 + 12 (build 21.0.1 + 12 - LTS)
-OpenJDK 64-Bit Server VM Temurin-21.0.1+12(build21.0.1+12-LTS,mixed mode,sharing)
+openjdk version "25.0.2" 2026-01-20 LTS
+OpenJDK Runtime Environment Temurin-25.0.2+10 (build 25.0.2+10-LTS)
+OpenJDK 64-Bit Server VM Temurin-25.0.2+10 (build 25.0.2+10-LTS, mixed mode, sharing)
 ```
 
 **Maven**
 
 ```jshelllanguage
 $ mvn --version
-Apache Maven 3.9.9 (8e8579a9e76f7d015ee5ec7bfcdc97d260186937)
+Apache Maven 3.9.14 (996c630dbc656c76214ce58821dcc58be960875b)
 Maven home: /home/alexandre/.sdkman/candidates/maven/current
-Java version: 21.0.5, vendor: Eclipse Adoptium, runtime: /home/alexandre/.sdkman/candidates/java/21.0.5-tem
+Java version: 25.0.2, vendor: Eclipse Adoptium, runtime: /home/alexandre/.sdkman/candidates/java/25.0.2-tem
 Default locale: en, platform encoding: UTF-8
-OS name: "linux", version: "5.15.167.4-microsoft-standard-wsl2", arch: "amd64", family: "unix"
+OS name: "linux", version: "6.6.87.2-microsoft-standard-wsl2", arch: "amd64", family: "unix"
 ```
 
 **Docker**
@@ -115,13 +115,13 @@ Context:           default
 ```
 
 **NodeJS**
-node --version
+$ node --version
 v24.11.1
 
 **NPM**
 
 ```jshelllanguage
-npm --version
+$ npm --version
 11.12.1
 ```
 
@@ -262,7 +262,7 @@ $ npm start
 👀 Wait a while until you get the following output:
 
 ```jshelllanguage
-@alexandre-touret ➜ /workspaces/feature-flag-workshop/gui (feat/user_identification) $ npm start
+$ npm start
 
 > music-store-gui@0.0.0 start
 > ng serve
