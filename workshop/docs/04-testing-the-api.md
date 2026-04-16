@@ -368,7 +368,7 @@ var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("disco
 LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
-Run the same API call:
+Run the same API call again:
 
 ```bash
 $ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
