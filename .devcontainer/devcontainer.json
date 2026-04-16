@@ -28,10 +28,11 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [
     8080,
-    4200
+    4200,
+    8000
   ],
   // Use 'postCreateCommand' to run commands after the container is created.
-  //"postCreateCommand": "npm install -g @angular/cli && npm install --prefix ./gui && ./api/mvnw -f./api/pom.xml clean install verify",
+  "postCreateCommand": "npm install -g @angular/cli && npm install --prefix ./gui && ./api/mvnw -f./api/pom.xml clean install verify",
   // Configure tool-specific properties.
   "customizations": {
     // Configure properties specific to VS Code.
