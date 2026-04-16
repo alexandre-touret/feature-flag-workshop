@@ -106,6 +106,12 @@ First, enable the OpenFeature libraries in your classpath in the `pom.xml` file.
     <version>0.11.20</version>
 </dependency>
 ```
+🛠️ Run the following command in a console:
+
+```bash
+$ cd api
+$ ./mvnw compile
+```
 
 🛠️ Refresh your editor.
 
@@ -362,6 +368,11 @@ var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("disco
 LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
+Run the same API call:
+
+```bash
+$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+```
 
 👀 The logger will help us see what is provided through the details:
 
@@ -376,6 +387,8 @@ var evaluationDetails = this.openFeatureAPI.getClient().getBooleanDetails("wrong
 LOGGER.info(evaluationDetails.toString());
 boolean isDiscountEnabled = evaluationDetails.getValue();
 ```
+
+
 
 👀 You should see output like this in the console:
 
@@ -471,6 +484,14 @@ private FeatureProvider createProvider() {
                     .offlineFlagSourcePath(Thread.currentThread().getContextClassLoader().getResource("/flags.flagd.json").getPath())
                     .build());
 }
+```
+
+Add then the following import declarations:
+
+```java
+import dev.openfeature.contrib.providers.flagd.Config;
+import dev.openfeature.contrib.providers.flagd.FlagdOptions;
+import dev.openfeature.contrib.providers.flagd.FlagdProvider;
 ```
 ℹ️ This setup relies on a file located at `src/main/resources/flags.flagd.json`.
 
@@ -764,9 +785,16 @@ void should_return_the_instrument_with_a_50P_discount_successfully() {
     var userGermany = new User("John", "Doe", "john.doe@example.com", "GERMANY");
     assertEquals(instrument.price()*0.5, discountAdapter.applyDiscount(instrument, userGermany).value().price());
 }
+
+@Test
+void should_return_the_instrument_with_no_discount_successfully() {
+    var userSpain = new User("John", "Doe", "john.doe@example.com", "SPAIN");
+    assertEquals(instrument.price(), discountAdapter.applyDiscount(instrument, userSpain).value().price());
+}
+
 ```
 
-🛠️ You can run the tests again and check out the new tests added run correctly.
+🛠️ You can run the tests again and check out the new tests added  correctly.
 
 :::warning
 ℹ️ This example is only for testing purpose and to illustrate the capabilities of OpenFeature.
