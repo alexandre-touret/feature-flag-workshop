@@ -3,7 +3,7 @@
 ## Purpose
 This repository contains the source code and documentation for the **Feature Flag Workshop**. The goal of this workshop is to provide hands-on experience with feature flags (also known as feature toggles), demonstrating how they can be used to safely decouple deployment from release, enable progressive rollouts, and facilitate A/B testing.
 
-The workshop uses [OpenFeature](https://openfeature.dev/) as a vendor-agnostic abstraction layer to manage feature flags across both a Java backend and an Angular frontend, with [Flagsmith](https://flagsmith.com/) used as the underlying feature flag management platform.
+The workshop uses [OpenFeature](https://openfeature.dev/) as a vendor-agnostic abstraction layer to manage feature flags across both a Java backend and an Angular frontend, with [UnKeash](https://getunleash.io/) used as the underlying feature flag management platform.
 
 ## Structure
 The project is divided into three main components:
