@@ -120,15 +120,15 @@ C4Container
     System_Boundary(system, "Music Store Application") {
         Container(gui, "Web Application (GUI)", "Angular, TypeScript", "User interface allowing customers to search for instruments and place orders.")
         Container(api, "API Application (Backend)", "Quarkus, Java", "Manages the business logic of instruments and orders, validates access and DTOs.")
-        ContainerDb(flagsmith, "Feature Flag Repository", "Flagsmith", "Stores and provide feature flag logic")
+        ContainerDb(unleash, "Feature Flag Repository", "unleash", "Stores and provide feature flag logic")
         ContainerDb(db, "Database", "H2 / PostgreSQL", "Stores information about instruments, customers, and orders.")
     }
 
     Rel(customer, gui, "Visits the store, places orders", "HTTPS")
     Rel(gui, api, "Sends API requests (with the User header)", "JSON/HTTPS")
     Rel(api, db, "Reads and writes business data", "JDBC")
-    Rel(gui, flagsmith, "Sends API requests to get feature flag", "JSON/HTTPS")
-    Rel(api, flagsmith, "Sends API requests to get feature flag", "JSON/HTTPS")
+    Rel(gui, unleash, "Sends API requests to get feature flag", "JSON/HTTPS or GRPC")
+    Rel(api, unleash, "Sends API requests to get feature flag", "JSON/HTTPS or GRPC")
 
     UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
     UpdateElementStyle(customer, $fontColor="white", $bgColor="#08427b", $borderColor="#052e56")
