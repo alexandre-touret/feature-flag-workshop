@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DiscountAdapterTest {
     @Inject
     DiscountAdapter discountAdapter;
+
     private Instrument instrument;
     private User user;
 
@@ -21,6 +22,7 @@ class DiscountAdapterTest {
     void setUp() {
         instrument = new Instrument(null, "Kawai K3", "Kawai K3", "Kawai", 4500D, "Acoustic Upright Piano", PIANO);
         user = new User("John", "Doe", "john.doe@example.com", "FRANCE");
+
     }
 
     @Test
