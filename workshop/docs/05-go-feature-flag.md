@@ -14,7 +14,7 @@ title: 5. Externalizing Feature Flag management with GO Feature Flag
 
 ## The OpenFeature Galaxy
 
-The true power of **OpenFeature** lies in its vibrant ecosystem. Because OpenFeature acts as a standardized abstraction layer (a vendor-agnostic Evaluation API), you are never locked into a single feature flag provider.
+The true power of **OpenFeature** lies in its ecosystem. Because OpenFeature acts as a standardized abstraction layer (a vendor-agnostic Evaluation API), you are never locked into a single feature flag provider.
 
 This ecosystem is composed of **Providers**: the software components that translate OpenFeature API calls into the specific logic required by a backend feature flag management system.
 
@@ -23,7 +23,7 @@ There are providers for almost every major feature flagging solution on the mark
 - **Open Source Solutions**: Flagd, Unleash, Flipt, PostHog, **GO Feature Flag**.
 - **In-house / Cloud Native**: Kubernetes ConfigMaps, AWS AppConfig, or simple In-Memory Providers (like we used in the previous chapter).
 
-This means you can start small with a simple file-based system (like Flagd) during development or early startup phases, and seamlessly migrate to a robust enterprise platform like LaunchDarkly or GO Feature Flag as your team scales—all without changing a single line of your application code! You simply swap out the OpenFeature Provider during application startup.
+This means you can start small with a simple file-based system (like Flagd) during development or early startup phases, and seamlessly migrate to a robust enterprise platform like LaunchDarkly or GO Feature Flag as your team scales—all without (_mostly_)changing a single line of your application code! You simply swap out the OpenFeature Provider during application startup.
 
 ## GO Feature Flag introduction
 

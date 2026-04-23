@@ -1,0 +1,51 @@
+# Définition des segments globaux réutilisables
+segments:
+  beta-testers:
+    description: "Utilisateurs internes ou beta testeurs pour validation préliminaire"
+    query: userRole eq "beta-tester"
+  european-clients:
+    description: "Clients situés en Europe (France, Allemagne, Royaume-Uni)"
+    query: clientCountry in ["FRANCE", "GERMANY", "UK"]
+
+# Définition des feature flags
+flags:
+  welcome-message:
+    variations:
+      on: true
+      off: false
+    targeting:
+      # 1. Targeting spécifique pour les testeurs ou développeurs internes (Canary)
+      - query: inSegment("beta-testers")
+        variation: on
+    defaultRule:
+      # 2. Déploiement progressif à un petit pourcentage d'utilisateurs (ex: 10%)
+      percentages:
+        on: 10
+        off: 90
+
+  discount-enabled:
+    variations:
+      on: true
+      off: false
+    targeting:
+      - query: inSegment("beta-testers")
+        variation: on
+      - query: inSegment("european-clients")
+        percentages:
+          on: 10
+          off: 90
+    defaultRule:
+      variation: off
+
+  discount-amount:
+    variations:
+      10-percent: 0.1
+      20-percent: 0.2
+      50-percent: 0.5
+    targeting:
+      - query: clientCountry eq "GERMANY"
+        variation: 50-percent
+      - query: clientCountry eq "UK"
+        variation: 20-percent
+    defaultRule:
+      variation: 10-percent
