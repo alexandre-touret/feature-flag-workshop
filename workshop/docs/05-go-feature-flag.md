@@ -23,7 +23,7 @@ There are providers for almost every major feature flagging solution on the mark
 - **Open Source Solutions**: Flagd, Unleash, Flipt, PostHog, **GO Feature Flag**.
 - **In-house / Cloud Native**: Kubernetes ConfigMaps, AWS AppConfig, or simple In-Memory Providers (like we used in the previous chapter).
 
-This means you can start small with a simple file-based system (like Flagd) during development or early startup phases, and seamlessly migrate to a robust enterprise platform like LaunchDarkly or GO Feature Flag as your team scales—all without (_mostly_)changing a single line of your application code! You simply swap out the OpenFeature Provider during application startup.
+This means you can start small with a simple file-based system (like Flagd) during development or early startup phases, and seamlessly migrate to a robust enterprise platform like LaunchDarkly or GO Feature Flag as your team scales—all without (_mostly_) changing a single line of your application code! You simply swap out the OpenFeature Provider during application startup.
 
 ## GO Feature Flag introduction
 
@@ -35,7 +35,7 @@ In this chapter, we will replace our static `flagd.json` file with a live GO Fea
 
 ### Target Architecture
 
-As a reminder, below the target architecture of our solution.
+As a reminder, below is the target architecture of our solution.
 
 ```mermaid
 ---
@@ -70,40 +70,72 @@ C4Container
 
 ## Getting started
 
-Open a new shell and run this command:
+🛠️ Go to the shell running Quarkus. Stop it by typing `Ctrl+C`.
 
-```bash
-$ cd infrastructure && docker compose up -d
+📝 Open the file `src/main/resources/application.properties`.
+🛠️ Add the following content:
+
+```properties
+go-feature-flag.url=http://localhost:1031
+go-feature-flag.polling-interval=10000
+quarkus.compose.devservices.files=src/main/docker/compose-devservices.yml
 ```
 
-Wait until the entire infrastructure has been executed.
+📝 Go then to the file `src/test/resources/application.properties`.
+🛠️ Add the following content:
 
-Run then this command to check if GO Feature Flag runs well:
-
-```bash
-$ docker compose ps
-```
-You should get this output:
-
-```bash
-NAME                               IMAGE                                  COMMAND              SERVICE           CREATED          STATUS          PORTS
-infrastructure-go-feature-flag-1   gofeatureflag/go-feature-flag:latest   "/go-feature-flag"   go-feature-flag   28 minutes ago   Up 17 seconds   0.0.0.0:1031->1031/tcp, [::]:1031->1031/tcp
+```properties
+go-feature-flag.url=http://localhost:1032
+%test.quarkus.compose.devservices.files=src/main/docker/compose-test-devservices.yml
 ```
 
-Check out the file ``infrastructure/go-feature-flag/flags.yaml``
+📝 Check out the file `infrastructure/go-feature-flag/flags.yaml`.
 
-You can see it contains the same configuration we implemented with Flagd.
+ℹ️ You can see it contains the same configuration we implemented with Flagd but adapted for GO Feature Flag.
 
-Let's test it out:
+🛠️ Run Quarkus again in the `api` folder:
 
-Check first the flag status for a French customer:
+```bash
+./mvnw clean quarkus:dev
+```
+
+🛠️ Once it's started, type `c`.
+👀 You should get this output:
+
+```bash
+== Dev Services
+
+Compose Dev Services
+  Injected config:  - com.docker.compose.project=quarkus-devservices-music-store-api
+
+jdbc-h2
+  Injected config:  - quarkus.datasource.jdbc.url=jdbc:h2:tcp://localhost:39279/mem:quarkus;DB_CLOSE_DELAY=-1
+
+Additional Dev Services config
+  Injected config:  - quarkus.hibernate-orm.schema-management.strategy=drop-and-create
+```
+
+🛠️ Run then the command `docker ps` to check if our container is fully ready:
+
+```bash
+docker ps
+CONTAINER ID   IMAGE                                  COMMAND              CREATED         STATUS         PORTS                                           NAMES
+3ea0edd63224   gofeatureflag/go-feature-flag:trixie   "/go-feature-flag"   2 minutes ago   Up 2 minutes   0.0.0.0:1031->1031/tcp, [::]:1031->1031/tcp     quarkus-devservices-music-store-api-go-feature-flag-1
+3d954cad4bbe   testcontainers/ryuk:0.13.0             "/bin/ryuk"          2 minutes ago   Up 2 minutes   0.0.0.0:32768->8080/tcp, [::]:32768->8080/tcp   testcontainers-ryuk-9789e62b-cf69-4fe7-9d09-6c293f8c1912
+```
+
+✅ Now Go Feature Flag Dev Service is ready!
+
+🛠️ Open a new shell (or an unused one) and test it out.
+
+🛠️ Check first the flag status for a French customer:
 
 ```bash
 http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE"}}'
 ```
 
-You should get this output:
+👀 You should get this output:
 
 ```bash
 HTTP/1.1 200 OK
@@ -144,7 +176,7 @@ X-Gofeatureflag-Version: 1.52.1
 }
 ```
 
-Now, let's evaluate the discount for a German customer:
+🛠️ Now, let's evaluate the discount for a German customer:
 
 ```bash
 http POST http://localhost:1031/v1/feature/discount-amount/eval \
@@ -152,7 +184,7 @@ http POST http://localhost:1031/v1/feature/discount-amount/eval \
 
 ```
 
-You should get this response:
+👀 You should get this response:
 
 ```bash
 HTTP/1.1 200 OK
@@ -175,3 +207,110 @@ X-Gofeatureflag-Version: 1.52.1
 ```
 
 ## Integrate Go Feature Flag in our API
+
+🛠️ Stop Quarkus by typing `Ctrl+C`.
+
+📝 Go to the `pom.xml` file.
+🛠️ Add the following dependency:
+
+```xml
+<dependency>
+    <groupId>dev.openfeature.contrib.providers</groupId>
+    <artifactId>go-feature-flag</artifactId>
+    <version>1.1.1</version>
+</dependency>
+```
+
+🛠️ You can also comment out the Flagd provider dependency:
+
+```xml
+<!--    <dependency>
+            <groupId>dev.openfeature.contrib.providers</groupId>
+            <artifactId>flagd</artifactId>
+            <version>0.11.20</version>
+        </dependency>-->
+```
+
+🛠️ Run the following command:
+
+```bash
+./mvnw compile
+```
+
+🛠️ Reload your IDE.
+
+📝 Go to the `OpenFeatureFactory` class.
+🛠️ Update the method `createProvider()` with the following content:
+
+```java
+    @ConfigProperty(name = "go-feature-flag.url")
+    String goFeatureFlagUrl;
+
+    @ConfigProperty(name = "go-feature-flag.polling-interval")
+    long goFeatureFLagPollingInterval;
+
+    private FeatureProvider createProvider() {
+/* Solution using Flagd
+return new FlagdProvider(
+                FlagdOptions.builder()
+                        .resolverType(Config.Resolver.FILE)
+                        .offlineFlagSourcePath(Thread.currentThread().getContextClassLoader().getResource("/flags.flagd.json").getPath())
+                        .build());*/
+
+        try {
+            return new GoFeatureFlagProvider(GoFeatureFlagProviderOptions.builder()
+                    .endpoint(goFeatureFlagUrl)
+                    .flagChangePollingIntervalMs(goFeatureFLagPollingInterval)
+                    .build());
+        } catch (InvalidOptions e) {
+            LOGGER.error("Unable to create the OpenFeature provider instance with this URL : [{}]", goFeatureFlagUrl);
+            throw new RuntimeException(e);
+        }
+    }
+```
+
+🛠️ Update then the import declarations with:
+
+```java
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
+import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+```
+
+ℹ️ [GoFeatureFlag requires the presence of a `targetingKey`](https://gofeatureflag.org/docs/concepts/evaluation-context#targeting-key), which is a unique identifier that represents the context of the evaluation (email, session id, a fingerprint or anything that is consistent).
+Through this key, we will ensure keeping the same behavior across different visits or sessions.
+
+📝 Go to the `DiscountAdapter` class.
+🛠️ Update the creation of the evaluation context:
+
+From:
+
+```java
+openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountry", user.country()));
+```
+
+To:
+```java
+openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountry", user.country()).add("targetingKey", user.email()));
+```
+
+🛠️ Restart Quarkus:
+
+```bash
+./mvnw clean quarkus:dev
+```
+
+🛠️ Run the tests by typing `r`.
+
+✅ You should get all the tests successful:
+
+```bash
+--
+All 58 tests are passing (0 skipped), 58 tests were run in 23469ms. Tests completed at 11:28:57.
+Press [e] to edit command line args (currently ''), [r] to re-run, [o] Toggle test output, [:] for the terminal, [h] for more options>
+```
+
+:::tip
+In this workshop, we created the provider using a private method `createProvider()`. For more flexibility, we can inject it into the [CDI context](https://quarkus.io/guides/cdi-reference) and inject an `InMemoryProvider` as we did previously in our tests instead of using TestContainer.
+:::
