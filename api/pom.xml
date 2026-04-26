@@ -102,12 +102,6 @@
             <artifactId>sdk</artifactId>
             <version>1.20.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.2.2</version>
-            <scope>test</scope>
-        </dependency>
         <!--        <dependency>-->
         <!--            <groupId>dev.openfeature.contrib.providers</groupId>-->
         <!--            <artifactId>flagd</artifactId>-->
