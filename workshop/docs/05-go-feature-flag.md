@@ -29,9 +29,26 @@ This means you can start small with a simple file-based system (like Flagd) duri
 
 [GO Feature Flag](https://gofeatureflag.org/) is an open-source, complete and lightweight feature flag solution. It allows you to manage your feature flags natively without needing complex infrastructure.
 
-Unlike some platforms that require a heavy server setup and a database, GO Feature Flag can run as a relay proxy, but its core principle is to use a simple configuration file (YAML, JSON, TOML) stored in various locations (GitHub, S3, HTTP, Kubernetes, etc.) to evaluate flags.
+Unlike some traditional enterprise feature-flagging platforms that require heavy database setups and complex infrastructure, **GO Feature Flag** is designed to be fully cloud-native, lightweight, and stateless.
 
-In this chapter, we will replace our static `flagd.json` file with a live GO Feature Flag relay proxy. You will learn how to configure features dynamically and observe the changes in your Java application in real-time, leveraging the OpenFeature GO Feature Flag Provider!
+Its architecture revolves around three core concepts:
+
+1. **The Flag Source (No Database Required):**
+   Instead of a database, your feature flags and targeting rules are defined in a simple configuration file (YAML, JSON, or TOML). This file acts as your single source of truth and can be hosted anywhere: a GitHub repository, an AWS S3 bucket, a Kubernetes ConfigMap, or even a simple HTTP server.
+2. **The Relay Proxy:**
+   This is a lightweight, standalone service (written in Go) that acts as the brain. It periodically fetches the flag configuration file from your chosen Flag Source. It then exposes a standard API (REST or gRPC) that your applications can query to evaluate flags.
+3. **The SDKs & OpenFeature Providers:**
+   Your application (whether it's a Java backend or an Angular frontend) uses an OpenFeature provider to communicate with the Relay Proxy. When a user requests a page, the app asks the Relay Proxy: *"Should this feature be enabled for this specific user context?"* The proxy evaluates the rules in memory and returns the answer instantly.
+
+**Why this matters for your deployments:**
+Because it relies on files rather than databases, you can manage your feature flags using standard GitOps practices (PRs, code reviews, rollbacks). Furthermore, because the Relay Proxy evaluates rules in-memory, it provides incredibly fast, low-latency flag resolution without the overhead of external network hops to a SaaS provider.
+
+
+![go feature flag architecture](./assets/go-feature-flag-architecture.svg)
+
+<div style={{textAlign: 'center'}}>
+_Source: https://gofeatureflag.org/docs/concepts/architecture_
+</div>
 
 ### Target Architecture
 
@@ -88,18 +105,40 @@ quarkus.compose.devservices.files=src/main/docker/compose-devservices.yml
 go-feature-flag.url=http://localhost:1032
 %test.quarkus.compose.devservices.files=src/main/docker/compose-test-devservices.yml
 ```
+👀 Check out the file `src/main/docker/go-feature-flag/flags.yaml`.
 
-📝 Check out the file `infrastructure/go-feature-flag/flags.yaml`.
+👀 You can see it contains the same configuration we implemented with Flagd but adapted for GO Feature Flag.
 
-ℹ️ You can see it contains the same configuration we implemented with Flagd but adapted for GO Feature Flag.
+For instance:
+
+```yaml
+discount-enabled:
+  variations:
+    on: true
+    off: false
+  targeting:
+    - query: clientCountry in ["FRANCE", "GERMANY", "UK"]
+      variation: on
+  defaultRule:
+    variation: off
+```
+
 
 🛠️ Run Quarkus again in the `api` folder:
 
 ```bash
-./mvnw clean quarkus:dev
+$ ./mvnw clean quarkus:dev
 ```
 
-🛠️ Once it's started, type `c`.
+Wait until you see the Quarkus logo:
+
+```bash
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+```
+
+🛠️ Type then `c`.
 👀 You should get this output:
 
 ```bash
@@ -115,7 +154,7 @@ Additional Dev Services config
   Injected config:  - quarkus.hibernate-orm.schema-management.strategy=drop-and-create
 ```
 
-🛠️ Run then the command `docker ps` to check if our container is fully ready:
+🛠️ Run then the command `docker ps` in another console to check if our container is fully ready:
 
 ```bash
 docker ps
@@ -131,7 +170,7 @@ CONTAINER ID   IMAGE                                  COMMAND              CREAT
 🛠️ Check first the flag status for a French customer:
 
 ```bash
-http POST http://localhost:1031/v1/allflags \
+$ http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE"}}'
 ```
 
@@ -179,7 +218,7 @@ X-Gofeatureflag-Version: 1.52.1
 🛠️ Now, let's evaluate the discount for a German customer:
 
 ```bash
-http POST http://localhost:1031/v1/feature/discount-amount/eval \
+$ http POST http://localhost:1031/v1/feature/discount-amount/eval \
   user:='{"key": "client-de-1", "custom": {"clientCountry": "GERMANY"}}'
 
 ```
@@ -234,7 +273,7 @@ X-Gofeatureflag-Version: 1.52.1
 🛠️ Run the following command:
 
 ```bash
-./mvnw compile
+$ ./mvnw compile
 ```
 
 🛠️ Reload your IDE.
@@ -277,9 +316,10 @@ import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOpti
 import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 ```
-
+:::info
 ℹ️ [GoFeatureFlag requires the presence of a `targetingKey`](https://gofeatureflag.org/docs/concepts/evaluation-context#targeting-key), which is a unique identifier that represents the context of the evaluation (email, session id, a fingerprint or anything that is consistent).
 Through this key, we will ensure keeping the same behavior across different visits or sessions.
+:::
 
 📝 Go to the `DiscountAdapter` class.
 🛠️ Update the creation of the evaluation context:
@@ -298,7 +338,7 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountr
 🛠️ Restart Quarkus:
 
 ```bash
-./mvnw clean quarkus:dev
+$ ./mvnw clean quarkus:dev
 ```
 
 🛠️ Run the tests by typing `r`.
