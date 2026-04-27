@@ -31,7 +31,10 @@ public class DiscountAdapter implements DiscountPort {
 //            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
 //        }
         var openFeatureAPIClient = this.openFeatureAPI.getClient();
-        openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountry", user.country()).add("targetingKey", user.email()));
+        openFeatureAPIClient.setEvaluationContext(new MutableContext()
+                .add("clientCountry", user.country())
+                .add("targetingKey", user.email())
+                .add("clientEmail", user.email())); // New attribute for segment targeting
         var evaluationDetails = openFeatureAPIClient.getBooleanDetails("discount-enabled", false);
         LOGGER.info(evaluationDetails.toString());
         boolean isDiscountEnabled = evaluationDetails.getValue();
