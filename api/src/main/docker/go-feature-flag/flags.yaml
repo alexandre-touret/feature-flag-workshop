@@ -10,7 +10,7 @@ discount-enabled:
     on: true
     off: false
   targeting:
-    - query: clientCountry in ["FRANCE", "GERMANY", "UK"]
+    - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
       variation: on
   defaultRule:
     variation: off
