@@ -21,7 +21,7 @@ While targeting users by a single attribute like their country is a great start,
 
 This is where **Segments** and **Bucketing** come into play.
 
-## 1. Segments
+## Segments
 
 A **Segment** allows you to define a specific group of users with a complex rule set just once, and then reference that segment across multiple feature flags.
 
@@ -211,61 +211,250 @@ You should get this output in the Quarkus console:
 All 59 tests are passing (0 skipped), 4 tests were run in 2257ms. Tests completed at 15:28:05 due to changes to DiscountAdapterTest.class.
 ```
 
-## 2. Bucketing & Progressive Rollouts
+## Bucketing & Progressive Rollouts
 
 Deploying a new feature to 100% of your targeted users at once can be risky. What if a new heavy database query brings your application down?
 
-**Bucketing** is the underlying mathematical mechanism that allows for **Progressive Rollouts** (like A/B testing or canary releases).
+### What is Bucketing?
+**Bucketing** is the underlying mathematical mechanism that allows for **Progressive Rollouts** and **A/B testing**.
 
-Instead of explicitly targeting specific user attributes, the feature flag engine takes the user's `targetingKey` and deterministically hashes it alongside the flag's name to assign them to a "bucket" (from 0 to 100). This ensures that a user who falls into the 10% bucket for a feature will consistently see that feature across sessions, avoiding a flickering UI.
+Instead of explicitly targeting specific user attributes, the feature flag engine takes the user's `bucketingKey` (which is typically set to `targetingKey` by default if not specified explicitly) and deterministically hashes it alongside the flag's name to assign them to a "bucket" (from 0 to 100). This ensures that a user who falls into the 10% bucket for a feature will consistently see that feature across sessions, avoiding a flickering UI.
 
-### Implementing a Progressive Rollout
+If you want to know more, you can [check out this documentation](https://gofeatureflag.org/docs/configure_flag/custom-bucketing).
 
-Let's implement a 25% progressive rollout for our `discount-enabled` flag. We want 25% of our regular users (who don't match the complex targeting) to receive the discount as a promotional test, while the remaining 75% continue to see the standard price.
+:::info What is A/B Testing?
+**A/B Testing** is an experiment where two or more variants of a page or feature are shown to users at random, and statistical analysis is used to determine which variation performs better for a given conversion goal.
 
-📝 Open `api/src/main/docker/go-feature-flag/flags.yaml`.
+Using bucketing, we can assign exactly 50% of our users to the "A" group (e.g., the old feature) and 50% to the "B" group (e.g., the new feature). By measuring how each group behaves, we can make data-driven decisions!
+:::
 
-🛠️ Find the `discount-enabled` flag and update its `defaultRule` to use percentages:
+### Implementing a Progressive Rollout / A/B Test
+
+Let's implement an A/B test (or 50/50 progressive rollout) for our `welcome-message` flag and our `discount-enabled` flag. We want 50% of our users to see the new variation and 50% to see the old one.
+
+📝 Create a a specific configuration file for A/B testing: `api/src/main/docker/go-feature-flag/abtesting-flags.yaml`.
+
+Let's configure it:
 
 ```yaml
-  discount-enabled:
-    variations:
-      on: true
-      off: false
-    targeting:
-      - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and ew(clientEmail, "@musician.com")
-        variation: on
-    defaultRule:
-      percentages:
-        on: 25
-        off: 75
+welcome-message:
+  variations:
+    on: true
+    off: false
+  defaultRule:
+    variation: off
+
+discount-enabled:
+  variations:
+    on: true
+    off: false
+  targeting:
+    - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
+      percentage:
+        off: 50
+        on: 50
+  defaultRule:
+    variation: off
+
+discount-amount:
+  variations:
+    10-percent: 0.1
+    20-percent: 0.2
+    50-percent: 0.5
+  targeting:
+    - query: clientCountry eq "GERMANY"
+      variation: 50-percent
+    - query: clientCountry eq "UK"
+      variation: 20-percent
+  defaultRule:
+    variation: 10-percent
 ```
+
+### Switching Configuration in the Proxy
+
+To tell Go Feature Flag to use this new configuration file instead of the default `flags.yaml`, we need to update the proxy configuration.
+
+📝 Open `api/src/main/docker/compose-devservices.yml`.
+🛠️ Change the `volumes` configuration uncommenting the different lines:
+
+```yaml
+services:
+  go-feature-flag:
+    image: gofeatureflag/go-feature-flag:trixie
+    ports:
+      - "1031:1031"
+    volumes:
+      - ./go-feature-flag/flags.yaml:/goff/flags.yaml
+      - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
+      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
+    environment:
+      - POLLING_INTERVAL=1000
+```
+
+
+📝 Open `api/src/main/docker/compose-test-devservices.yml`.
+🛠️ Change the `volumes` configuration uncommenting the different lines:
+
+```yaml
+services:
+  go-feature-flag:
+    image: gofeatureflag/go-feature-flag:trixie
+    ports:
+      - "1032:1031"
+    volumes:
+      - ./go-feature-flag/flags.yaml:/goff/flags.yaml
+      - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
+      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
+    environment:
+      - POLLING_INTERVAL=1000
+
+```
+
+📝 Open `api/src/main/docker/go-feature-flag/proxy.yaml`.
+
+🛠️ Change the `path` to point to the A/B testing configuration:
+
+```yaml
+pollingInterval: 1000 # The relay-proxy will poll the file every second to check for changes
+retrievers:
+  - kind: file
+    path: /goff/abtesting-flags.yaml # Changed from flags.yaml to abtesting-flags.yaml
+```
+
+The Go Feature Flag Relay Proxy will automatically detect this change and load the new configuration within 1 second.
 
 ### How it works behind the scenes
 
-When a request comes in, GO Feature Flag evaluates the targeting rules. If the user doesn't match the complex query, it falls back to the `defaultRule`.
+When a request comes in, GO Feature Flag evaluates the targeting rules. It takes the `bucketingKey` (in our case, the user's email since we mapped it to `targetingKey`) and hashes it along with the flag name.
+- If the resulting hash falls between 0 and 49, the evaluation returns `on`.
+- If it falls between 50 and 100, the evaluation returns `off`.
 
-Then, it takes the `targetingKey` (in our case, the user's email) and hashes it along with the flag name (`discount-enabled`).
-- If the resulting hash falls between 0 and 24, the evaluation returns `on`.
-- If it falls between 25 and 100, the evaluation returns `off`.
-
-Because the hashing algorithm is deterministic, `john.doe@gmail.com` will always fall into the same bucket and receive the exact same experience every time they log in.
+Because the hashing algorithm is deterministic, `john.doe@musician.com` will always fall into the same bucket and receive the exact same experience every time they log in.
 
 ### Testing the Bucketing
 
 🛠️ Ensure the GO Feature Flag container is still running and restart Quarkus if necessary:
 
 ```bash
-cd api
-./mvnw clean quarkus:dev
+$ cd api
+$ ./mvnw clean quarkus:dev
 ```
 
 🛠️ You can test this behavior by making requests to the API with different user emails. Open a new terminal and run:
 
 ```bash
-http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user1@example.com","country":"US"}' accept:"application/json"
+$ http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user1@musician.com","country":"UK"}' accept:"application/json"
 ```
 
-👀 Try replacing the `email` with `user2@example.com`, `user3@example.com`, etc. Over a large enough sample, you will observe that approximately 1 out of every 4 users will evaluate to `hasDiscount: true`, while the rest will receive `hasDiscount: false`.
+👀 Run the [K6 command](https://k6.io/) to check how the bucketing works:
 
-✅ For example, try to find an email that falls into the 25% bucket and notice how repeating the request with that exact email **always** yields the discount!
+```bash
+$ cd ../infrastructure/scripts
+$  k6 run k6-discount-enabled-test.js
+```
+
+## Canary Deployment
+
+:::info What is a Canary Deployment?
+A **Canary Deployment** is a release strategy where a new feature is deployed to a small, isolated subset of users (the "canaries") before rolling it out to the entire infrastructure. This minimizes the impact of potential bugs or performance issues.
+
+If the canary release goes well, the percentage of users seeing the feature is gradually increased (e.g., from 10% to 25%, to 50%, to 100%) until everyone has access. It's an excellent way to validate stability in a production environment.
+:::
+
+### Implementing a Canary Deployment
+
+Go Feature Flag supports scheduled progressive rollouts natively!
+We will implement a scenario where:
+1. Internal testers (`@musician.com` emails) ALWAYS have the new feature enabled (100%).
+2. The regular population of users gets a **time-based progressive rollout** of the new feature. Over the course of 4 days, the percentage of users seeing the new variation will smoothly and automatically scale from a small percentage up to a larger one!
+
+🛠 Create a specific configuration file for canary deployments: `api/src/main/docker/go-feature-flag/canary-flags.yaml`.
+
+Add the following content:
+
+```yaml
+welcome-message:
+  variations:
+    on: true
+    off: false
+  targeting:
+    - query: clientEmail ew "@musician.com"
+      variation: on
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: on
+        percentage: 0
+        date: 2026-04-28T05:00:00.100Z
+      end:
+        variation: on
+        percentage: 100
+        date: 2026-04-28T23:00:00.100Z
+
+discount-enabled:
+  variations:
+    on: true
+    off: false
+  targeting:
+    - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
+      progressiveRollout:
+        initial:
+          variation: on
+          percentage: 20
+          date: 2026-04-28T05:00:00.100Z
+        end:
+          variation: on
+          percentage: 80
+          date: 2026-04-28T23:00:00.100Z
+  defaultRule:
+    variation: off
+
+discount-amount:
+  variations:
+    10-percent: 0.1
+    20-percent: 0.2
+    50-percent: 0.5
+  targeting:
+    - query: clientCountry eq "GERMANY"
+      variation: 50-percent
+    - query: clientCountry eq "UK"
+      variation: 20-percent
+  defaultRule:
+    variation: 10-percent
+
+
+```
+
+:::warning
+Update the date used in this file with the current date
+:::
+
+### Switching Configuration in the Proxy
+
+Once again, we need to instruct the Relay Proxy to load this specific file.
+
+📝 Open `api/src/main/docker/go-feature-flag/proxy.yaml`.
+
+🛠️ Change the `path` to point to the Canary configuration:
+
+```yaml
+pollingInterval: 1000 # The relay-proxy will poll the file every second to check for changes
+retrievers:
+  - kind: file
+    path: /goff/canary-flags.yaml # Changed to canary-flags.yaml
+```
+
+The Go Feature Flag Relay Proxy will automatically update its configuration!
+
+### Testing the Canary Release
+
+You can test this setup using the Go Feature Flag REST API. Since the progressive rollout is time-dependent, the evaluation result changes dynamically based on the current date relative to the configured `initial` and `end` dates!
+
+🛠️ Run the same K6 script again:
+
+```bash
+$ cd ../infrastructure/scripts
+$  k6 run k6-discount-enabled-test.js
+```
