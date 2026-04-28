@@ -21,7 +21,7 @@ class DiscountAdapterTest {
     @BeforeEach
     void setUp() {
         instrument = new Instrument(null, "Kawai K3", "Kawai K3", "Kawai", 4500D, "Acoustic Upright Piano", PIANO);
-        user = new User("John", "Doe", "john.doe@example.com", "FRANCE");
+        user = new User("John", "Doe", "john.doe@musician.com", "FRANCE");
 
     }
 
@@ -33,13 +33,19 @@ class DiscountAdapterTest {
 
     @Test
     void should_return_the_instrument_with_a_20P_discount_successfully() {
-        var userGB = new User("John", "Doe", "john.doe@example.com", "UK");
+        var userGB = new User("John", "Doe", "john.doe@musician.com", "UK");
         assertEquals(instrument.price() * 0.8, discountAdapter.applyDiscount(instrument, userGB).value().price());
     }
 
     @Test
     void should_return_the_instrument_with_a_50P_discount_successfully() {
-        var userGermany = new User("John", "Doe", "john.doe@example.com", "GERMANY");
+        var userGermany = new User("John", "Doe", "john.doe@musician.com", "GERMANY");
         assertEquals(instrument.price() * 0.5, discountAdapter.applyDiscount(instrument, userGermany).value().price());
+    }
+
+    @Test
+    void should_return_discount_not_enabled_with_unknown_mail_successfully() {
+        var userGermany = new User("John", "Doe", "john.doe@test.com", "GERMANY");
+        assertEquals(instrument.price(), discountAdapter.applyDiscount(instrument, userGermany).value().price());
     }
 }
