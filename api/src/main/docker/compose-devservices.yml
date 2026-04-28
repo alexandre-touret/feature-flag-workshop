@@ -5,6 +5,8 @@ services:
       - "1031:1031"
     volumes:
       - ./go-feature-flag/flags.yaml:/goff/flags.yaml
+      - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
+      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
       - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
     environment:
       - POLLING_INTERVAL=1000
