@@ -36,36 +36,35 @@ Let's say we want to restrict the discount feature to a specific group of users�
 🛠️ Update the `discount-enabled` flag to include a query combining the country and email checks. **Note:** Go Feature Flag uses `ew()` for "ends with":
 
 ```yaml
-flags:
-  welcome-message:
-    variations:
-      on: true
-      off: false
-    defaultRule:
+welcome-message:
+  variations:
+    on: true
+    off: false
+  defaultRule:
+    variation: on
+
+discount-enabled:
+  variations:
+    on: true
+    off: false
+  targeting:
+    - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
       variation: on
+  defaultRule:
+    variation: off
 
-  discount-enabled:
-    variations:
-      on: true
-      off: false
-    targeting:
-      - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
-        variation: on
-    defaultRule:
-      variation: off
-
-  discount-amount:
-    variations:
-      10-percent: 0.1
-      20-percent: 0.2
-      50-percent: 0.5
-    targeting:
-      - query: clientCountry eq "GERMANY"
-        variation: 50-percent
-      - query: clientCountry eq "UK"
-        variation: 20-percent
-    defaultRule:
-      variation: 10-percent
+discount-amount:
+  variations:
+    10-percent: 0.1
+    20-percent: 0.2
+    50-percent: 0.5
+  targeting:
+    - query: clientCountry eq "GERMANY"
+      variation: 50-percent
+    - query: clientCountry eq "UK"
+      variation: 20-percent
+  defaultRule:
+    variation: 10-percent
 ```
 
 📝 Check then the evaluation with the Go Feature Flag API to validate it parsed correctly without errors:
@@ -350,8 +349,8 @@ $ http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"u
 👀 Run the [K6 command](https://k6.io/) to check how the bucketing works:
 
 ```bash
-$ cd ../infrastructure/scripts
-$  k6 run k6-discount-enabled-test.js
+$ cd /workspaces/feature-flag-workshop/infrastructure/scripts/ ; k6 run k6-discount-enabled-test.js
+
 ```
 
 ## Canary Deployment
@@ -365,9 +364,7 @@ If the canary release goes well, the percentage of users seeing the feature is g
 ### Implementing a Canary Deployment
 
 Go Feature Flag supports scheduled progressive rollouts natively!
-We will implement a scenario where:
-1. Internal testers (`@musician.com` emails) ALWAYS have the new feature enabled (100%).
-2. The regular population of users gets a **time-based progressive rollout** of the new feature. Over the course of 4 days, the percentage of users seeing the new variation will smoothly and automatically scale from a small percentage up to a larger one!
+We will implement a scenario where users with a `@musician.com` emails get  **time-based progressive rollout** of the new feature. Over the course of 4 days, the percentage of users seeing the new variation will smoothly and automatically scale from a small percentage up to a larger one!
 
 🛠 Create a specific configuration file for canary deployments: `api/src/main/docker/go-feature-flag/canary-flags.yaml`.
 
@@ -451,9 +448,36 @@ The Go Feature Flag Relay Proxy will automatically update its configuration!
 
 You can test this setup using the Go Feature Flag REST API. Since the progressive rollout is time-dependent, the evaluation result changes dynamically based on the current date relative to the configured `initial` and `end` dates!
 
-🛠️ Run the same K6 script again:
+To really see the canary rollout in action, let's configure a very short timeframe in `canary-flags.yaml`!
+
+📝 Edit `api/src/main/docker/go-feature-flag/canary-flags.yaml` and set the `initial` date to **now** and the `end` date to **5 minutes from now** for the `discount-enabled` flag:
+
+```yaml
+      progressiveRollout:
+        initial:
+          variation: on
+          percentage: 0
+          date: 2026-04-29T10:00:00.000Z # Set this to NOW
+        end:
+          variation: on
+          percentage: 100
+          date: 2026-04-29T10:05:00.000Z # Set this to NOW + 5 minutes
+```
+:::tip
+*(Make sure to adjust the time to your current local time in UTC)*
+
+You can use [this web tool](https://time.now/tool/iso-8601-converter/) to convert the current date to ISO 8601 format.
+:::
+
+🛠️ Run the K6 script immediately to see the initial rollout percentage (should be close to 0%):
 
 ```bash
 $ cd ../infrastructure/scripts
-$  k6 run k6-discount-enabled-test.js
+$ k6 run k6-discount-enabled-test.js
 ```
+
+☕ Wait 2 minutes, and run the script again. You should see the percentage of users getting the discount automatically increase to around 40%!
+
+☕ Wait another 3 minutes (until the `end` date is passed), and run the script one last time. You should now see 100% of the users getting the new feature!
+
+The feature is gradually exposed to more and more users automatically over time, without any redeployment or manual intervention!

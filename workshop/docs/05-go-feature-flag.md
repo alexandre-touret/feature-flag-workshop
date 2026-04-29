@@ -308,6 +308,18 @@ return new FlagdProvider(
     }
 ```
 
+🛠️ Update then the method ``getOpenFeatureAPIInstance()`` to wait the availability of the provider before setting the provider:
+
+```java
+@ApplicationScoped
+@Produces
+public OpenFeatureAPI getOpenFeatureAPIInstance() {
+    var openFeatureAPI = OpenFeatureAPI.getInstance();
+    openFeatureAPI.setProviderAndWait(createProvider());
+    return openFeatureAPI;
+}
+```
+
 🛠️ Update then the import declarations with:
 
 ```java
