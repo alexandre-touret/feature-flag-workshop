@@ -71,7 +71,7 @@ flags:
 📝 Check then the evaluation with the Go Feature Flag API to validate it parsed correctly without errors:
 
 ```bash
-http POST http://localhost:1031/v1/allflags \
+$ http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@musician.com"}}'
 ```
 
@@ -112,7 +112,7 @@ http POST http://localhost:1031/v1/allflags \
 📝 Now if you use another email address domain:
 
 ```bash
-http POST http://localhost:1031/v1/allflags \
+$ http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@somewhereelse.com"}}'
 
 ```
@@ -170,15 +170,15 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext()
 🛠️ Test it with a standard user (should NOT get the discount):
 
 ```bash
-http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FRANCE"}' accept:"application/json"
+$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FRANCE"}' accept:"application/json"
 ```
 
-👀 The `hasDiscount` field in the response should not be filled.
+👀 The `hasDiscount` field in the response **should not be filled**.
 
 🛠️ Now test it with a premium musician (should get the discount):
 
 ```bash
-http :8080/instruments User:'{"firstName":"Eric","lastName":"Clapton","email":"eric.clapton@musician.com","country":"UK"}' accept:"application/json"
+$ http :8080/instruments User:'{"firstName":"Eric","lastName":"Clapton","email":"eric.clapton@musician.com","country":"UK"}' accept:"application/json"
 ```
 
 👀 The `hasDiscount` field should be filled and set to `true`. The `price` should be reduced.
@@ -335,10 +335,9 @@ Because the hashing algorithm is deterministic, `john.doe@musician.com` will alw
 
 ### Testing the Bucketing
 
-🛠️ Ensure the GO Feature Flag container is still running and restart Quarkus if necessary:
+🛠️ Ensure the GO Feature Flag container is still running and restart Quarkus:
 
 ```bash
-$ cd api
 $ ./mvnw clean quarkus:dev
 ```
 
