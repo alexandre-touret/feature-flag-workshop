@@ -22,6 +22,11 @@ export class UserService {
     this.userSignal.set(user);
   }
 
+  getCurrentUser(): User | null {
+    return this.userSignal();
+  }
+
+
   private loadUser(): User | null {
     const storedUser = localStorage.getItem(this.USER_KEY);
     if (storedUser) {
