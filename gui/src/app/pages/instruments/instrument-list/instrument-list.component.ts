@@ -17,9 +17,8 @@ import {InstrumentService} from '../../../services/instrument.service';
 import {Instrument} from '../../../models/instrument.model';
 import {ConfirmDialogComponent} from '../../../dialogs/confirm-dialog/confirm-dialog.component';
 import {firstValueFrom} from 'rxjs';
-
-// TODO: Chapter 5 - Uncomment to import OpenFeature
-// import { OpenFeature } from '@openfeature/web-sdk';
+import {OpenFeature} from '@openfeature/web-sdk';
+import {UserService} from '../../../services/user.service';
 
 @Component({
   selector: 'app-instrument-list',
@@ -185,6 +184,7 @@ import {firstValueFrom} from 'rxjs';
 })
 export class InstrumentListComponent implements OnInit {
   private instrumentService = inject(InstrumentService);
+  private userService = inject(UserService);
   private dialog = inject(MatDialog);
 
   displayedColumns: string[] = ['id', 'name', 'manufacturer', 'type', 'price', 'actions'];
@@ -231,9 +231,18 @@ export class InstrumentListComponent implements OnInit {
   }
 
   private async initFeatureFlags() {
-    // TODO: Implement OpenFeature initialization
-    // For now, manually toggle or keep false
-    this.showDiscountBanner.set(false);
+    const user = this.userService.getCurrentUser();
+    if (!user) return;
+
+    await OpenFeature.setContext({
+      targetingKey: user.email,
+      clientEmail: user.email,
+      clientCountry: user.country
+    });
+
+    const client = OpenFeature.getClient();
+    const discountEnabled = client.getBooleanValue('discount-enabled', false);
+    this.showDiscountBanner.set(discountEnabled);
   }
 
   applyFilter(event: Event) {
