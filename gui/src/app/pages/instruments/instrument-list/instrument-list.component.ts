@@ -17,7 +17,7 @@ import {InstrumentService} from '../../../services/instrument.service';
 import {Instrument} from '../../../models/instrument.model';
 import {ConfirmDialogComponent} from '../../../dialogs/confirm-dialog/confirm-dialog.component';
 import {firstValueFrom} from 'rxjs';
-import {OpenFeature} from '@openfeature/web-sdk';
+import {OpenFeature, ProviderEvents} from '@openfeature/web-sdk';
 import {UserService} from '../../../services/user.service';
 
 @Component({
@@ -243,6 +243,20 @@ export class InstrumentListComponent implements OnInit {
     const client = OpenFeature.getClient();
     const discountEnabled = client.getBooleanValue('discount-enabled', false);
     this.showDiscountBanner.set(discountEnabled);
+
+    client.addHandler(ProviderEvents.ConfigurationChanged, (eventDetails) => {
+      console.log('OpenFeature Provider Configuration Changed:', eventDetails);
+      this.showDiscountBanner.set(client.getBooleanValue('discount-enabled', false));
+      // Reload data to reflect the backend changes (prices)
+      this.instrumentsResource.reload();
+    });
+
+    client.addHandler(ProviderEvents.ContextChanged, (eventDetails) => {
+      console.log('OpenFeature Provider Context Changed:', eventDetails);
+      this.showDiscountBanner.set(client.getBooleanValue('discount-enabled', false));
+      // Reload data to reflect the backend changes (prices)
+      this.instrumentsResource.reload();
+    });
   }
 
   applyFilter(event: Event) {

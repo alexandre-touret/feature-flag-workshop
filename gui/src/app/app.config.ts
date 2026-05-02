@@ -17,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       OpenFeatureModule.forRoot({
         provider: new GoFeatureFlagWebProvider({
-          endpoint: 'http://localhost:1031'
+          endpoint: 'http://localhost:4200/feature'
         }),
       })
     )
