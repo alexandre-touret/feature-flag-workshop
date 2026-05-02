@@ -6,24 +6,18 @@ title: 7. Feature flag on the client side
 :::info
  ℹ️ What will you do and learn in this chapter?
 - Integrate Feature Flagging in an Angular App
+- Subscribe to real-time configuration changes via Provider Events
 :::
 
-*   Goal: Hide/Show UI elements related to the discount ("Promo" badges, crossed-out prices).
-*   Frontend (GUI):
-    *   Integration of the OpenFeature Web SDK.
-    *   Use of a synchronized Provider (FlagSmith offers a compatible JS SDK).
-    *   Creation of an Angular *ifFeature directive or a Guard to protect components.
-*   Problematic: Managing the desynchronization between the Backend (price) and Frontend (display) flags.
-*   Semantic Versioning (SemVer) : Montrer comment activer une fonctionnalité uniquement pour les utilisateurs ayant une         MCP
-     version d'application clientVersion >= "1.2.0". C'est un cas d'usage extrêmement courant en feature flagging (surtout côté       • context7 Connected
-     mobile).
+# Client-Side Feature Flagging
 
+In the previous chapters, we configured feature flags on the backend side to control prices and business logic. Now, let's explore how to integrate OpenFeature and Go Feature Flag into our frontend (GUI) to toggle UI elements like the discount banner.
 
 ## Setup
 
-Stop the GUI typing ``CTRL+C``.
+First, make sure to stop the running GUI process by typing ``CTRL+C`` in its terminal.
 
-Install OpenFeature and the Go Feature Flag Angular SDK.
+🛠️ Install OpenFeature and the Go Feature Flag Angular Web Provider SDK:
 
 ```bash
 $ cd gui
@@ -31,39 +25,43 @@ $ npm install @openfeature/go-feature-flag-web-provider
 $ npm install @openfeature/angular-sdk
 ```
 
-In the file ``/src/app.config.js``, Add the OpenFeature import declaration
+📝 Open the file `gui/src/app/app.config.ts`.
+🛠️ Add the OpenFeature provider initialization to the `providers` array:
 
 ```typescript
 provideAnimationsAsync(),
-   importProvidersFrom(
-     OpenFeatureModule.forRoot({
-       provider: new GoFeatureFlagWebProvider({
-         endpoint: 'http://localhost:1031'
-       }),
-     })
-   )
+importProvidersFrom(
+  OpenFeatureModule.forRoot({
+    provider: new GoFeatureFlagWebProvider({
+      endpoint: 'http://localhost:1031/'
+    }),
+  })
+)
 ```
 
-Declare then the imports:
+And ensure the required imports are declared at the top of the file:
 
 ```typescript
-
 import {OpenFeatureModule} from '@openfeature/angular-sdk';
 import {GoFeatureFlagWebProvider} from '@openfeature/go-feature-flag-web-provider';
 ```
 
-In the file ``/src/pages/instruments/instrument-list/instrument-list.component.ts``
-Add the ``UserService`` as a variable of the ``InstrumentListComponent``:
+## Evaluating Flags in Components
 
+Now that our OpenFeature client is configured, let's use it in our component to dynamically display the discount banner based on the user's context.
+
+📝 Open `gui/src/app/pages/instruments/instrument-list/instrument-list.component.ts`.
+
+🛠️ Inject the `UserService` into the `InstrumentListComponent` so we can retrieve the current user's details for context evaluation:
 
 ```typescript
 export class InstrumentListComponent implements OnInit {
   private instrumentService = inject(InstrumentService);
-  private userService = inject(UserService);
+  private userService = inject(UserService); // New injection
   private dialog = inject(MatDialog);
 ```
 
-Change then the method ``initFeatureFlags()``:
+🛠️ Update the `initFeatureFlags()` method to set the OpenFeature context and retrieve the value of our `discount-enabled` flag:
 
 From:
 ```typescript
@@ -92,18 +90,69 @@ To:
   }
 ```
 
-Declare then these imports:
+Don't forget to declare these missing imports:
 
 ```typescript
 import {OpenFeature} from '@openfeature/web-sdk';
 import {UserService} from '../../../services/user.service';
 ```
 
-Start the front end :
+🛠️ Restart the frontend server:
 
 ```bash
 $ npm start
 ```
-Change your user email and country. Refresh the page and you should see the discount button.
 
-## Event management
+✅ Open the application in your browser. Change your user email (e.g. to `test@musician.com`) and country (e.g. to `UK`) via the user settings. Refresh the page and you should see the discount banner appear based on your targeting rules!
+
+## Event Management
+
+:::info
+ ℹ️ Go Feature Flag's web provider offers real-time updates. By listening to provider events, we can dynamically update the UI state when a feature flag is modified on the server without requiring a page refresh.
+:::
+
+Currently, you must refresh the page to see changes if a feature flag is modified on the backend. Let's automatically update the banner when the provider's configuration is changed.
+
+📝 In `instrument-list.component.ts`, update `initFeatureFlags` to add an event handler:
+
+```typescript
+  private async initFeatureFlags() {
+    const user = this.userService.getCurrentUser();
+    if (!user) return;
+
+    await OpenFeature.setContext({
+      targetingKey: user.email,
+      clientEmail: user.email,
+      clientCountry: user.country
+    });
+
+    const client = OpenFeature.getClient();
+
+    // Add event listener for real-time updates
+    client.addHandler(ProviderEvents.ConfigurationChanged, () => {
+      const discountEnabled = client.getBooleanValue('discount-enabled', false);
+      this.showDiscountBanner.set(discountEnabled);
+    });
+
+    // Initial evaluation
+    const discountEnabled = client.getBooleanValue('discount-enabled', false);
+    this.showDiscountBanner.set(discountEnabled);
+  }
+```
+
+And remember to add the missing `ProviderEvents` import:
+
+```typescript
+import {OpenFeature, ProviderEvents} from '@openfeature/web-sdk';
+```
+
+### Testing Events
+
+🛠️ To test it, keep your browser open and modify the `api/src/main/docker/go-feature-flag/canary-flags.yaml` file (or whichever flag file your proxy is currently using). For instance, change the `clientEmail` targeting suffix from `musician.com` to `producer.com`.
+
+👀 Without refreshing the page, your browser's UI should automatically update! If you open your browser's Developer Tools console, you might see log messages like:
+
+```bash
+OpenFeature Provider Configuration Changed:
+Object { message: "flag configuration have changed", flagsChanged: (1) […], clientName: undefined, domain: undefined, providerName: "_GoFeatureFlagWebProvider" }
+```
