@@ -7,5 +7,15 @@
       "^/api": ""
     },
     "logLevel": "debug"
+  },
+  "/feature": {
+    "target": "http://localhost:1031",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/feature": ""
+    }
   }
 }
