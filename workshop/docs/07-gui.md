@@ -33,7 +33,7 @@ provideAnimationsAsync(),
 importProvidersFrom(
   OpenFeatureModule.forRoot({
     provider: new GoFeatureFlagWebProvider({
-      endpoint: 'http://localhost:1031/'
+      endpoint: 'http://localhost:4200/feature'
     }),
   })
 )
@@ -46,18 +46,57 @@ import {OpenFeatureModule} from '@openfeature/angular-sdk';
 import {GoFeatureFlagWebProvider} from '@openfeature/go-feature-flag-web-provider';
 ```
 
+## Wrapping OpenFeature in a Service
+
+To keep our application architecture clean, let's encapsulate the OpenFeature SDK interactions within a dedicated Angular service.
+
+🛠️ Create a new file `gui/src/app/services/feature-flag.service.ts` and add the following content:
+
+```typescript
+import { Injectable, signal } from '@angular/core';
+import { OpenFeature, ProviderEvents } from '@openfeature/web-sdk';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FeatureFlagService {
+  private client = OpenFeature.getClient();
+
+  async setContext(email: string, country: string) {
+    await OpenFeature.setContext({
+      targetingKey: email,
+      clientEmail: email,
+      clientCountry: country
+    });
+  }
+
+  isDiscountEnabled(): boolean {
+    return this.client.getBooleanValue('discount-enabled', false);
+  }
+
+  onConfigurationChanged(callback: (eventDetails: any) => void) {
+    this.client.addHandler(ProviderEvents.ConfigurationChanged, callback);
+  }
+
+  onContextChanged(callback: (eventDetails: any) => void) {
+    this.client.addHandler(ProviderEvents.ContextChanged, callback);
+  }
+}
+```
+
 ## Evaluating Flags in Components
 
-Now that our OpenFeature client is configured, let's use it in our component to dynamically display the discount banner based on the user's context.
+Now that our OpenFeature client is encapsulated, let's use it in our component to dynamically display the discount banner based on the user's context.
 
 📝 Open `gui/src/app/pages/instruments/instrument-list/instrument-list.component.ts`.
 
-🛠️ Inject the `UserService` into the `InstrumentListComponent` so we can retrieve the current user's details for context evaluation:
+🛠️ Inject the `FeatureFlagService` and `UserService` into the `InstrumentListComponent`:
 
 ```typescript
 export class InstrumentListComponent implements OnInit {
   private instrumentService = inject(InstrumentService);
-  private userService = inject(UserService); // New injection
+  private userService = inject(UserService);
+  private featureFlagService = inject(FeatureFlagService);
   private dialog = inject(MatDialog);
 ```
 
@@ -78,32 +117,19 @@ To:
     const user = this.userService.getCurrentUser();
     if (!user) return;
 
-    await OpenFeature.setContext({
-      targetingKey: user.email,
-      clientEmail: user.email,
-      clientCountry: user.country
-    });
+    await this.featureFlagService.setContext(user.email, user.country);
 
-    const client = OpenFeature.getClient();
-    const discountEnabled = client.getBooleanValue('discount-enabled', false);
-    this.showDiscountBanner.set(discountEnabled);
+    this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
   }
 ```
 
-Don't forget to declare these missing imports:
-
-```typescript
-import {OpenFeature} from '@openfeature/web-sdk';
-import {UserService} from '../../../services/user.service';
-```
-
-🛠️ Restart the frontend server:
+🛠️ Restart the frontend server (if needed):
 
 ```bash
 $ npm start
 ```
 
-✅ Open the application in your browser. Change your user email (e.g. to `test@musician.com`) and country (e.g. to `UK`) via the user settings. Refresh the page and you should see the discount banner appear based on your targeting rules!
+✅ Open the application in your browser. Change your user email (e.g. to `test@musician.com`) and country (e.g. to `UK`) via the user settings. The page will reload and you should see the discount banner appear based on your targeting rules!
 
 ## Event Management
 
@@ -111,39 +137,33 @@ $ npm start
  ℹ️ Go Feature Flag's web provider offers real-time updates. By listening to provider events, we can dynamically update the UI state when a feature flag is modified on the server without requiring a page refresh.
 :::
 
-Currently, you must refresh the page to see changes if a feature flag is modified on the backend. Let's automatically update the banner when the provider's configuration is changed.
+Currently, you must wait for a page reload to see changes if a feature flag is modified on the backend or the user context is updated. Let's automatically update the banner when the provider's configuration is changed.
 
-📝 In `instrument-list.component.ts`, update `initFeatureFlags` to add an event handler:
+📝 In `instrument-list.component.ts`, update `initFeatureFlags` to add event handlers:
 
 ```typescript
   private async initFeatureFlags() {
     const user = this.userService.getCurrentUser();
     if (!user) return;
 
-    await OpenFeature.setContext({
-      targetingKey: user.email,
-      clientEmail: user.email,
-      clientCountry: user.country
+    await this.featureFlagService.setContext(user.email, user.country);
+
+    this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
+
+    this.featureFlagService.onConfigurationChanged((eventDetails) => {
+      console.log('OpenFeature Provider Configuration Changed:', eventDetails);
+      this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
+      // Reload data to reflect the backend changes (prices)
+      this.instrumentsResource.reload();
     });
 
-    const client = OpenFeature.getClient();
-
-    // Add event listener for real-time updates
-    client.addHandler(ProviderEvents.ConfigurationChanged, () => {
-      const discountEnabled = client.getBooleanValue('discount-enabled', false);
-      this.showDiscountBanner.set(discountEnabled);
+    this.featureFlagService.onContextChanged((eventDetails) => {
+      console.log('OpenFeature Provider Context Changed:', eventDetails);
+      this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
+      // Reload data to reflect the backend changes (prices)
+      this.instrumentsResource.reload();
     });
-
-    // Initial evaluation
-    const discountEnabled = client.getBooleanValue('discount-enabled', false);
-    this.showDiscountBanner.set(discountEnabled);
   }
-```
-
-And remember to add the missing `ProviderEvents` import:
-
-```typescript
-import {OpenFeature, ProviderEvents} from '@openfeature/web-sdk';
 ```
 
 ### Testing Events
