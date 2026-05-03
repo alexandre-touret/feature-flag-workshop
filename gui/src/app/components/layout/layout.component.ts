@@ -157,6 +157,7 @@ export class LayoutComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.userService.setUser(result);
+        window.location.reload();
       }
     });
   }
