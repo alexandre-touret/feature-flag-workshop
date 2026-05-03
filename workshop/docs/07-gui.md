@@ -25,7 +25,7 @@ $ npm install @openfeature/go-feature-flag-web-provider
 $ npm install @openfeature/angular-sdk
 ```
 
-📝 Open the file `gui/src/app/app.config.ts`.
+🛠️  Open the file `gui/src/app/app.config.ts`.
 🛠️ Add the OpenFeature provider initialization to the `providers` array:
 
 ```typescript
@@ -38,12 +38,19 @@ importProvidersFrom(
   })
 )
 ```
+🛠️ Replace the endpoint value with the GUI's URL provided in the port screen with the `feature` path. For instance: ``https://sturdy-system-5gvq9q5p7x3vggp-4200.app.github.dev/feature``.
 
 And ensure the required imports are declared at the top of the file:
 
 ```typescript
 import {OpenFeatureModule} from '@openfeature/angular-sdk';
 import {GoFeatureFlagWebProvider} from '@openfeature/go-feature-flag-web-provider';
+```
+
+Update also the ``@angular/core`` import declaration:
+
+```typescript
+import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection} from '@angular/core';
 ```
 
 ## Wrapping OpenFeature in a Service
@@ -100,6 +107,13 @@ export class InstrumentListComponent implements OnInit {
   private dialog = inject(MatDialog);
 ```
 
+🛠️ Update the import declaration adding these two lines:
+
+```typescript
+import {UserService} from '../../../services/user.service';
+import {FeatureFlagService} from '../../../services/feature-flag.service';
+```
+
 🛠️ Update the `initFeatureFlags()` method to set the OpenFeature context and retrieve the value of our `discount-enabled` flag:
 
 From:
@@ -128,6 +142,10 @@ To:
 ```bash
 $ npm start
 ```
+
+:::warning
+Check in your VS Code Port menu if the ports 4200,1031 are declared as public. If not, switch them from private to public.
+:::
 
 ✅ Open the application in your browser. Change your user email (e.g. to `test@musician.com`) and country (e.g. to `UK`) via the user settings. The page will reload and you should see the discount banner appear based on your targeting rules!
 
