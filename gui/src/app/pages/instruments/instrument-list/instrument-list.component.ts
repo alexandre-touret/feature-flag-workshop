@@ -17,8 +17,8 @@ import {InstrumentService} from '../../../services/instrument.service';
 import {Instrument} from '../../../models/instrument.model';
 import {ConfirmDialogComponent} from '../../../dialogs/confirm-dialog/confirm-dialog.component';
 import {firstValueFrom} from 'rxjs';
-import {OpenFeature, ProviderEvents} from '@openfeature/web-sdk';
 import {UserService} from '../../../services/user.service';
+import {FeatureFlagService} from '../../../services/feature-flag.service';
 
 @Component({
   selector: 'app-instrument-list',
@@ -185,6 +185,7 @@ import {UserService} from '../../../services/user.service';
 export class InstrumentListComponent implements OnInit {
   private instrumentService = inject(InstrumentService);
   private userService = inject(UserService);
+  private featureFlagService = inject(FeatureFlagService);
   private dialog = inject(MatDialog);
 
   displayedColumns: string[] = ['id', 'name', 'manufacturer', 'type', 'price', 'actions'];
@@ -234,26 +235,20 @@ export class InstrumentListComponent implements OnInit {
     const user = this.userService.getCurrentUser();
     if (!user) return;
 
-    await OpenFeature.setContext({
-      targetingKey: user.email,
-      clientEmail: user.email,
-      clientCountry: user.country
-    });
+    await this.featureFlagService.setContext(user.email, user.country);
 
-    const client = OpenFeature.getClient();
-    const discountEnabled = client.getBooleanValue('discount-enabled', false);
-    this.showDiscountBanner.set(discountEnabled);
+    this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
 
-    client.addHandler(ProviderEvents.ConfigurationChanged, (eventDetails) => {
+    this.featureFlagService.onConfigurationChanged((eventDetails) => {
       console.log('OpenFeature Provider Configuration Changed:', eventDetails);
-      this.showDiscountBanner.set(client.getBooleanValue('discount-enabled', false));
+      this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
       // Reload data to reflect the backend changes (prices)
       this.instrumentsResource.reload();
     });
 
-    client.addHandler(ProviderEvents.ContextChanged, (eventDetails) => {
+    this.featureFlagService.onContextChanged((eventDetails) => {
       console.log('OpenFeature Provider Context Changed:', eventDetails);
-      this.showDiscountBanner.set(client.getBooleanValue('discount-enabled', false));
+      this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
       // Reload data to reflect the backend changes (prices)
       this.instrumentsResource.reload();
     });
