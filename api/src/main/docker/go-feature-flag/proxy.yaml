@@ -2,3 +2,7 @@ pollingInterval: 1000 # The relay-proxy will poll the file every second to check
 retrievers:
   - kind: file
     path: /goff/canary-flags.yaml # Location of the flags configuration file in your docker container.
+otel:
+  exporter:
+    otlp:
+      endpoint: "http://jaeger:4318"

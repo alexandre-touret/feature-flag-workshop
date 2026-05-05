@@ -61,6 +61,7 @@ return new FlagdProvider(
     @Produces
     public OpenFeatureAPI getOpenFeatureAPIInstance() {
         var openFeatureAPI = OpenFeatureAPI.getInstance();
+        openFeatureAPI.addHooks(new ErrorHandlerHook());
         openFeatureAPI.setProviderAndWait(createProvider());
         return openFeatureAPI;
     }
