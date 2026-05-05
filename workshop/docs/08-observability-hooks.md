@@ -13,7 +13,7 @@ title: 8. Observability & Hooks
 
 ## What are hooks?
 
-Hooks are a mechanism in OpenFeature that allow you to tap into the feature flag evaluation lifecycle. They let you execute custom code at specific points (stages) during a flag evaluation without modifying the core application logic.
+ℹ️ Hooks are a mechanism in OpenFeature that allow you to tap into the feature flag evaluation lifecycle. They let you execute custom code at specific points (stages) during a flag evaluation without modifying the core application logic.
 
 The main stages where you can attach hooks are:
 - **Before:** Executed before the flag evaluation. Useful for validation or enriching the evaluation context.
@@ -33,7 +33,7 @@ Hooks can be registered at different levels: globally, per-client, or for indivi
 
 ## Track errors in the API using Hooks
 
-Create a new file ``api/src/main/java/info/touret/musicstore/infrastructure/featureflag/openfeature/OpenFeatureFactory.java`` with the following content:
+📝 Create a new file ``api/src/main/java/info/touret/musicstore/infrastructure/featureflag/openfeature/ErrorHandlerHook.java`` with the following content:
 
 ```java
 package info.touret.musicstore.infrastructure.featureflag.openfeature;
@@ -64,7 +64,7 @@ public class ErrorHandlerHook implements BooleanHook {
 }
 ```
 
-In the method ``getOpenFeatureAPIInstance()`` of the class ``OpenFeatureFactory``, we will  globally register this new hook:
+📝 In the method ``getOpenFeatureAPIInstance()`` of the class ``OpenFeatureFactory``, we will globally register this new hook:
 
 ```java
 @ApplicationScoped
@@ -77,7 +77,7 @@ public OpenFeatureAPI getOpenFeatureAPIInstance() {
 }
 ```
 
-To simulate an error, we will also comment the declaration of the ``targetingKey`` in the method ``applyDiscount()`` of the class ``DiscountAdapter``:
+📝 To simulate an error, we will also comment the declaration of the ``targetingKey`` in the method ``applyDiscount()`` of the class ``DiscountAdapter``:
 
 ```java
 openFeatureAPIClient.setEvaluationContext(new MutableContext()
@@ -86,19 +86,19 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext()
                 .add("clientEmail", user.email()));
 ```
 
-If necessary, restart Quarkus:
+🛠️ If necessary, restart Quarkus:
 
 ```bash
 ./mvnw quarkus:dev
 ```
 
-Run in another terminal this command:
+🛠️ Run in another terminal this command:
 
 ```bash
 http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user11@musician.com","country":"UK"}' accept:"application/json"
 ```
 
-You should see these log entries on your console:
+👀 You should see these log entries on your console:
 
 ```bash
 2026-05-05 11:15:37,187 INFO  [info.touret.musicstore.infrastructure.featureflag.openfeature.ErrorHandlerHook] (quarkus-virtual-thread-0) >>> Before evaluating boolean flag: discount-enabled
@@ -107,7 +107,7 @@ You should see these log entries on your console:
 
 ## Use the OpenTelemetry Hook
 
-Analysing the whole feature-flag's process could be tricky. Let's see how OpenTelemetry can help us.
+Analysing the whole feature-flag's process could be tricky. Let's see how [OpenTelemetry](https://opentelemetry.io/) can help us.
 
 :::tip
 If you want to know more about observability, feel free to check out [this workshop](https://github.com/worldline/observability-workshop).
@@ -115,9 +115,9 @@ If you want to know more about observability, feel free to check out [this works
 
 ### Deploy Jaeger
 
-We need first to add Jaegger to collect and get a GUI to navigate through traces.
+We need first to add [Jaeger](https://www.jaegertracing.io/) to collect and get a GUI to navigate through traces.
 
-In the file ``api/src/main/docker/compose-devservices.yml``, add the following lines:
+📝 In the file ``api/src/main/docker/compose-devservices.yml``, add the following lines:
 
 ```yaml
   jaeger:
@@ -138,7 +138,7 @@ In the file ``api/src/main/docker/compose-devservices.yml``, add the following l
 
 ### Configure Go Feature Flag
 
-In the file ``api/src/main/docker/go-feature-flag/proxy.yaml``, add the following configuration lines:
+📝 In the file ``api/src/main/docker/go-feature-flag/proxy.yaml``, add the following configuration lines:
 
 ```yaml
 otel:
@@ -147,9 +147,9 @@ otel:
       endpoint: "http://jaeger:4318"
 ```
 
-### Add Quarkus's Opentelemetry support
+### Add Quarkus's OpenTelemetry support
 
-In the ``pom.xml`` file, add the following dependencies:
+📝 In the ``pom.xml`` file, add the following dependencies:
 
 ```xml
 <dependency>
@@ -162,7 +162,7 @@ In the ``pom.xml`` file, add the following dependencies:
 </dependency>
 ```
 
-In the ``api/src/main/resources/application.properties`` file, add the following configuration:
+📝 In the ``api/src/main/resources/application.properties`` file, add the following configuration:
 
 ```properties
 quarkus.application.name=music-store
@@ -170,7 +170,7 @@ quarkus.otel.exporter.otlp.endpoint=http://localhost:4317
 quarkus.datasource.jdbc.telemetry=true
 ```
 
-Restart Quarkus :
+🛠️ Restart Quarkus:
 
 ```bash
 ./mvnw quarkus:dev
@@ -178,30 +178,30 @@ Restart Quarkus :
 
 ### Test
 
-Run again K6 to simulate some traffic. In another terminal, run the following command:
+🛠️ Run again K6 to simulate some traffic. In another terminal, run the following command:
 
 ```bash
 cd ../infrastructure/scripts
 k6 run k6-discount-enabled-test.js
 ```
 
-Go to the port screen, check out the ``16686`` port and click on it to open Jaeger.
+👀 Go to the port screen, check out the ``16686`` port and click on it to open Jaeger.
 You should see this screen:
 
 ![Jaeger Home Screen](./assets/JaegerUI.png)
 
-Make some queries on the traces.
+🛠️ Make some queries on the traces.
 
-Select the app ``go-feature-flag``.
+🛠️ Select the ``go-feature-flag`` service:
 
 ![Jaeger Query](./assets/JaegerUI_1.png)
 
-Click on "Find Traces".
+🛠️ Click on "Find Traces".
 
-You could see then the corresponding traces.
+👀 You could see then the corresponding traces.
 
 ![Jaeger Query](./assets/JaegerUI_Post.png)
 
 :::info
-You don't see a whole transaction from Quarkus to Go Feature Flag because, the configuration is not downloaded through an API call.
+ℹ️ You don't see a whole transaction from Quarkus to Go Feature Flag because the configuration is not downloaded through an API call.
 :::
