@@ -77,11 +77,11 @@ Without OpenFeature:
 ![without OpenFeature](./assets/feature_flag_without_openfeature.png)
 
 With OpenFeature, we get a standardized API decoupling the feature flag repository from the clients:
-
+<div style={{textAlign: 'center'}}>
 ![with OpenFeature](./assets/feature_flag_with_openfeature.png)
 
 _Source: https://openfeature.dev/docs/reference/intro_
-
+</div>
 🔗 **Learn more:** [OpenFeature Architecture & Concepts](https://openfeature.dev/docs/reference/intro)
 
 ## The Evaluation API
@@ -93,16 +93,16 @@ First, enable the OpenFeature libraries in your classpath in the `pom.xml` file.
 Uncomment this section:
 
 ```xml
-   <dependency>
-            <groupId>dev.openfeature</groupId>
-            <artifactId>sdk</artifactId>
-            <version>1.20.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.openfeature.contrib.providers</groupId>
-            <artifactId>flagd</artifactId>
-            <version>0.11.20</version>
-        </dependency>
+<dependency>
+    <groupId>dev.openfeature</groupId>
+    <artifactId>sdk</artifactId>
+    <version>1.20.1</version>
+</dependency>
+<dependency>
+    <groupId>dev.openfeature.contrib.providers</groupId>
+    <artifactId>flagd</artifactId>
+    <version>0.11.20</version>
+</dependency>
 ```
 
 🛠️ Refresh your editor.
