@@ -77,12 +77,14 @@ Without OpenFeature:
 ![without OpenFeature](./assets/feature_flag_without_openfeature.png)
 
 With OpenFeature, we get a standardized API decoupling the feature flag repository from the clients:
-
+<div style={{textAlign: 'center'}}>
 ![with OpenFeature](./assets/feature_flag_with_openfeature.png)
+</div>
 
 <div style={{textAlign: 'center'}}>
 _Source: https://openfeature.dev/docs/reference/intro_
 </div>
+
 
 🔗 **Learn more:** [OpenFeature Architecture & Concepts](https://openfeature.dev/docs/reference/intro)
 
@@ -95,16 +97,16 @@ First, enable the OpenFeature libraries in your classpath in the `pom.xml` file.
 📝 Uncomment this section:
 
 ```xml
-<dependency>
-    <groupId>dev.openfeature</groupId>
-    <artifactId>sdk</artifactId>
-    <version>1.20.1</version>
-</dependency>
-<dependency>
-    <groupId>dev.openfeature.contrib.providers</groupId>
-    <artifactId>flagd</artifactId>
-    <version>0.11.20</version>
-</dependency>
+   <dependency>
+            <groupId>dev.openfeature</groupId>
+            <artifactId>sdk</artifactId>
+            <version>1.20.1</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.openfeature.contrib.providers</groupId>
+            <artifactId>flagd</artifactId>
+            <version>0.11.20</version>
+        </dependency>
 ```
 🛠️ Run the following command in a console:
 
@@ -120,11 +122,11 @@ $ ./mvnw compile
 🛠️ Add a new attribute to get the `OpenFeatureAPI` instance and update the constructor as follows:
 
 ```java
-private final OpenFeatureAPI openFeatureAPI;
+    private final OpenFeatureAPI openFeatureAPI;
 
-public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
-    this.openFeatureAPI = openFeatureAPI;
-}
+    public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
+        this.openFeatureAPI = openFeatureAPI;
+    }
 ```
 
 ℹ️ This way, the `OpenFeatureAPI` is automatically provided by CDI.
@@ -144,7 +146,6 @@ import dev.openfeature.sdk.OpenFeatureAPI;
         // For now, let's keep it simple (manually toggle for testing if needed)
 //        boolean manualDiscount = false; // Toggle to true to test UI
 //        if (manualDiscount) {
-//        private static final Logger LOGGER = LoggerFactory.getLogger(DiscountAdapter.class);
 //            double originalPrice = instrument.price();
 //            double discountedPrice = originalPrice * 0.9; // 10% discount
 //            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
@@ -313,7 +314,7 @@ void should_return_the_instrument_with_a_discount_successfully() {
 🛠️ Restart your Quarkus Dev environment by typing `Ctrl+C` in your console and restarting the command:
 
 ```bash
-$ ./mvnw quarkus:dev
+./mvnw quarkus:dev
 ```
 
 ✅ Validate your unit/integration tests by typing `r` to resume testing.
@@ -328,7 +329,7 @@ All 56 tests are passing (0 skipped), 56 tests were run in 11808ms. Tests comple
 🛠️ You can also run this API call with the `httpie` tool in another terminal:
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
 ```
 
 👀 You should see the same content as before:

@@ -24,7 +24,6 @@ The main stages where you can attach hooks are:
 <div style={{textAlign: 'center'}}>
 ![hooks](./assets/hooks_overview.png)
 
-
 _Source: https://openfeature.dev/specification/sections/hooks/_
 </div>
 
