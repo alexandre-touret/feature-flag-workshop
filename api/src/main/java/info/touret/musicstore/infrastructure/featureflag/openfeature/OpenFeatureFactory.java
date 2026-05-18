@@ -1,10 +1,12 @@
 package info.touret.musicstore.infrastructure.featureflag.openfeature;
 
+import dev.openfeature.contrib.hooks.otel.TracesHook;
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
 import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import dev.openfeature.sdk.FeatureProvider;
 import dev.openfeature.sdk.OpenFeatureAPI;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.quarkus.arc.Arc;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -59,9 +61,10 @@ return new FlagdProvider(
      */
     @ApplicationScoped
     @Produces
+    @WithSpan
     public OpenFeatureAPI getOpenFeatureAPIInstance() {
         var openFeatureAPI = OpenFeatureAPI.getInstance();
-        openFeatureAPI.addHooks(new ErrorHandlerHook());
+        openFeatureAPI.addHooks(new ErrorHandlerHook(), new TracesHook());
         openFeatureAPI.setProviderAndWait(createProvider());
         return openFeatureAPI;
     }

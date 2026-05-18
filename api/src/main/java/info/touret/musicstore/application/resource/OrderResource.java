@@ -6,6 +6,7 @@ import info.touret.musicstore.application.mapper.OrderMapper;
 import info.touret.musicstore.domain.model.Order;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.service.OrderService;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -53,6 +54,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @RunOnVirtualThread
+    @WithSpan
     public Response retrieveOrders(@NotNull @Valid @RestHeader(USER) UserDto userDto) {
         LOGGER.debug("User : {}", userDto);
         return handleResult(orderService.findOrders(), 200);
@@ -68,6 +70,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/{id}")
     @RunOnVirtualThread
+    @WithSpan
     public Response retrieveOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") Long id) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(id);
@@ -83,6 +86,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @RunOnVirtualThread
+    @WithSpan
     public Response createOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @Valid OrderDto orderDto) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.createOrder(orderMapper.toOrder(orderDto));
@@ -101,6 +105,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @PUT
     @Path("/{id}")
     @RunOnVirtualThread
+    @WithSpan
     public Response updateOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") Long id,
                                 @NotNull @Valid @RequestBody(
                                         content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -123,6 +128,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @DELETE
     @Path("/{id}")
     @RunOnVirtualThread
+    @WithSpan
     public Response deleteOrder(@NotNull @Valid @RestHeader(USER) UserDto userDto, @NotNull @RestPath("id") String orderId) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.findById(Long.valueOf(orderId));
@@ -144,6 +150,7 @@ public class OrderResource extends AbstractMusicStoreResource {
     @GET
     @Path("/search")
     @RunOnVirtualThread
+    @WithSpan
     public Response search(@RestHeader(USER) UserDto userDto, @NotNull @QueryParam("q") String query) {
         LOGGER.debug("User : {}", userDto);
         var result = orderService.search(query);

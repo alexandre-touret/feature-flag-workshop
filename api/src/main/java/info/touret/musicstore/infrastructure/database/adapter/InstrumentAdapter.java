@@ -7,6 +7,7 @@ import info.touret.musicstore.domain.port.InstrumentPort;
 import info.touret.musicstore.infrastructure.database.entity.InstrumentEntity;
 import info.touret.musicstore.infrastructure.database.mapper.InstrumentMapper;
 import info.touret.musicstore.infrastructure.database.repository.InstrumentRepository;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
@@ -36,11 +37,13 @@ public class InstrumentAdapter implements InstrumentPort {
     }
 
 
+    @WithSpan
     @Override
     public Result<List<Instrument>> findAll() {
         return Result.success(instrumentMapper.toInstruments(instrumentRepository.listAll()));
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Instrument> create(Instrument instrument) {
@@ -57,6 +60,7 @@ public class InstrumentAdapter implements InstrumentPort {
         }
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Instrument> update(Instrument instrument) {
@@ -72,6 +76,7 @@ public class InstrumentAdapter implements InstrumentPort {
         }
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Boolean> delete(Instrument instrument) {
@@ -92,12 +97,14 @@ public class InstrumentAdapter implements InstrumentPort {
         }
     }
 
+    @WithSpan
     @Override
     public Result<List<Instrument>> search(String query) {
         Objects.requireNonNull(query);
         return Result.success(instrumentMapper.toInstruments(instrumentRepository.search(query)));
     }
 
+    @WithSpan
     @Override
     public Result<Instrument> findById(Long id) {
         return Optional.ofNullable(instrumentMapper.toinstrument(instrumentRepository.findById(id)))

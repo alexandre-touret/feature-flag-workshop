@@ -4,6 +4,7 @@ import info.touret.musicstore.domain.model.DomainError;
 import info.touret.musicstore.domain.model.Order;
 import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.port.OrderPort;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class OrderService {
      *
      * @return A Result containing a list of all orders
      */
+    @WithSpan
     public Result<List<Order>> findOrders() {
         LOGGER.debug("Finding all orders");
         return orderPort.findAll();
@@ -38,6 +40,7 @@ public class OrderService {
      * @param order The order to create
      * @return A Result wrapping the created order, or a DomainError on validation failure
      */
+    @WithSpan
     public Result<Order> createOrder(Order order) {
         LOGGER.info("Creating order [{}]", order);
         if (order.id() != null) {
@@ -53,6 +56,7 @@ public class OrderService {
      * @param order The updated order model
      * @return A Result wrapping the updated order, or a DomainError on validation failure
      */
+    @WithSpan
     public Result<Order> updateOrder(Order order) {
         LOGGER.info("Updating order [{}]", order);
         if (order.id() == null) {
@@ -66,6 +70,7 @@ public class OrderService {
      *
      * @param order The order to delete
      */
+    @WithSpan
     public void deleteOrder(Order order) {
         LOGGER.info("Deleting order [{}]", order);
         orderPort.delete(order);
@@ -77,6 +82,7 @@ public class OrderService {
      * @param query The search term
      * @return A Result containing a list of matching orders
      */
+    @WithSpan
     public Result<List<Order>> search(String query) {
         LOGGER.debug("Searching for orders by query [{}]]", query);
         return orderPort.search(query);
@@ -88,6 +94,7 @@ public class OrderService {
      * @param id The technical identifier of the order
      * @return A Result wrapping the found order, or a DomainError if not found
      */
+    @WithSpan
     public Result<Order> findById(Long id) {
         LOGGER.debug("Finding order by id [{}]", id);
         return orderPort.findById(id);
