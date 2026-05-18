@@ -20,6 +20,7 @@
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <archunit-junit5.version>1.4.1</archunit-junit5.version>
         <sonar.organization>touretinfo</sonar.organization>
+        <opentelemetry-javaagent.version>2.2.0</opentelemetry-javaagent.version>
     </properties>
 
     <dependencyManagement>
@@ -102,6 +103,7 @@
             <artifactId>sdk</artifactId>
             <version>1.20.1</version>
         </dependency>
+
         <!--        <dependency>-->
         <!--            <groupId>dev.openfeature.contrib.providers</groupId>-->
         <!--            <artifactId>flagd</artifactId>-->
@@ -124,6 +126,11 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-extension-trace-propagators</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.openfeature.contrib.hooks</groupId>
+            <artifactId>otel</artifactId>
+            <version>3.3.1</version>
         </dependency>
     </dependencies>
 

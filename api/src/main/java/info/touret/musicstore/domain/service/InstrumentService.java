@@ -6,6 +6,7 @@ import info.touret.musicstore.domain.model.Result;
 import info.touret.musicstore.domain.model.User;
 import info.touret.musicstore.domain.port.DiscountPort;
 import info.touret.musicstore.domain.port.InstrumentPort;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class InstrumentService {
      *
      * @return A Result containing a list of all instruments
      */
+    @WithSpan
     public Result<List<Instrument>> findInstruments() {
         LOGGER.debug("Finding all instruments");
         return instrumentPort.findAll();
@@ -41,6 +43,7 @@ public class InstrumentService {
      * @param instrument The instrument to create
      * @return A Result wrapping the created instrument, or a DomainError on validation failure
      */
+    @WithSpan
     public Result<Instrument> createInstrument(Instrument instrument) {
         LOGGER.info("Creating instrument {}", instrument);
         if (instrument.id() != null) {
@@ -56,6 +59,7 @@ public class InstrumentService {
      * @param instrument The updated instrument model
      * @return A Result wrapping the updated instrument, or a DomainError on validation failure
      */
+    @WithSpan
     public Result<Instrument> updateInstrument(Instrument instrument) {
         LOGGER.info("Updating instrument [{}]", instrument);
         if (instrument.id() == null) {
@@ -71,6 +75,7 @@ public class InstrumentService {
      * @param instrument The instrument to delete
      * @return A Result wrapping a boolean indicating successful deletion, or a DomainError
      */
+    @WithSpan
     public Result<Boolean> deleteInstrument(Instrument instrument) {
         LOGGER.info("Deleting instrument [{}]", instrument);
         return instrumentPort.delete(instrument);
@@ -82,6 +87,7 @@ public class InstrumentService {
      * @param query The search term
      * @return A Result containing a list of matching instruments
      */
+    @WithSpan
     public Result<List<Instrument>> search(String query) {
         LOGGER.debug("Searching instruments with query [{}]", query);
         return instrumentPort.search(query);
@@ -93,11 +99,13 @@ public class InstrumentService {
      * @param id The technical identifier of the instrument
      * @return A Result wrapping the found instrument, or a DomainError if not found
      */
+    @WithSpan
     public Result<Instrument> findById(Long id) {
         LOGGER.debug("Finding instrument by id [{}]", id);
         return instrumentPort.findById(id);
     }
 
+    @WithSpan
     public Result<Instrument> applyDiscount(Instrument instrument, User user) {
         LOGGER.debug("Applying discount to instrument [{}] for user [{}]", instrument, user);
         return discountPort.applyDiscount(instrument, user);

@@ -8,6 +8,7 @@ import info.touret.musicstore.infrastructure.database.entity.OrderEntity;
 import info.touret.musicstore.infrastructure.database.mapper.OrderMapper;
 import info.touret.musicstore.infrastructure.database.repository.CustomerRepository;
 import info.touret.musicstore.infrastructure.database.repository.OrderRepository;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
@@ -37,11 +38,13 @@ public class OrderAdapter implements OrderPort {
         this.customerRepository = customerRepository;
     }
 
+    @WithSpan
     @Override
     public Result<List<Order>> findAll() {
         return Result.success(orderMapper.toOrders(orderRepository.listAll()));
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Order> create(Order order) {
@@ -60,6 +63,7 @@ public class OrderAdapter implements OrderPort {
         }
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Order> update(Order order) {
@@ -74,6 +78,7 @@ public class OrderAdapter implements OrderPort {
         }
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<List<Order>> search(String query) {
@@ -81,6 +86,7 @@ public class OrderAdapter implements OrderPort {
         return Result.success(orderMapper.toOrders(orderRepository.search(query)));
     }
 
+    @WithSpan
     @Override
     public Result<Order> findById(Long id) {
         return Optional.ofNullable(orderMapper.toOrder(orderRepository.findById(id)))
@@ -88,6 +94,7 @@ public class OrderAdapter implements OrderPort {
                 .orElseGet(() -> Result.failure(new DomainError.DataNotFound(String.format("Order %d not found", id))));
     }
 
+    @WithSpan
     @Transactional
     @Override
     public Result<Boolean> delete(Order order) {
