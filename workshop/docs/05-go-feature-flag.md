@@ -278,6 +278,13 @@ import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 ```
 
+### ℹ️ How does it evaluate flags? (In-Process Evaluation)
+
+By configuring the `flagChangePollingIntervalMs`, the GO Feature Flag provider operates using **in-process evaluation** (or local evaluation).
+
+- **In-Memory Cache:** Instead of making a network call to the GO Feature Flag server every time your application checks a flag, the provider periodically downloads the rules into the Java process memory in the background.
+- **Instant Evaluation:** When your code actually checks a flag, it runs the targeting rules locally against this cache. This ensures **ultra-low latency**, better **scalability**, and **resilience** (if the flag server goes down, the last known configuration is used).
+
 ℹ️ [GoFeatureFlag requires the presence of a `targetingKey`](https://gofeatureflag.org/docs/concepts/evaluation-context#targeting-key), which is a unique identifier that represents the context of the evaluation (email, session id, a fingerprint or anything that is consistent).
 Through this key, we will ensure keeping the same behavior across different visits or sessions.
 
