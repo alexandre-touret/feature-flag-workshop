@@ -160,6 +160,11 @@ otel:
     <groupId>io.opentelemetry</groupId>
     <artifactId>opentelemetry-extension-trace-propagators</artifactId>
 </dependency>
+<dependency>
+    <groupId>dev.openfeature.contrib.hooks</groupId>
+    <artifactId>otel</artifactId>
+    <version>3.3.1</version>
+</dependency>
 ```
 
 📝 In the ``api/src/main/resources/application.properties`` file, add the following configuration:
@@ -168,6 +173,73 @@ otel:
 quarkus.application.name=music-store
 quarkus.otel.exporter.otlp.endpoint=http://localhost:4317
 quarkus.datasource.jdbc.telemetry=true
+```
+
+### Add Traces Hook
+
+📝 In the method ``getOpenFeatureAPIInstance()`` of the class ``OpenFeatureFactory``, we will add the new hook and annotate the method with ``@WithSpan``:
+
+```java
+@ApplicationScoped
+@Produces
+@WithSpan
+public OpenFeatureAPI getOpenFeatureAPIInstance() {
+    var openFeatureAPI = OpenFeatureAPI.getInstance();
+    openFeatureAPI.addHooks(new ErrorHandlerHook(), new TracesHook());
+    openFeatureAPI.setProviderAndWait(createProvider());
+    return openFeatureAPI;
+}
+```
+
+Add the following import to the class:
+
+```java
+import dev.openfeature.contrib.hooks.otel.TracesHook;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+```
+
+### Add custom spans
+
+In order to better visualize traces in Jaeger, we can also add some manual spans in our code.
+
+📝 In the class ``DiscountAdapter``, update the ``applyDiscount()`` method:
+- Annotating it with ``@WithSpan``
+- Creating a new span [to get OpenFeature insights](https://github.com/open-feature/java-sdk-contrib)
+
+```java
+@WithSpan
+@Override
+public Result<Instrument> applyDiscount(Instrument instrument, User user) {
+    Span discountEnabledspan = tracer.spanBuilder("openfeature-discount-enabled").startSpan();
+
+    var openFeatureAPIClient = this.openFeatureAPI.getClient();
+    openFeatureAPIClient.setEvaluationContext(new MutableContext()
+            .add("clientCountry", user.country())
+            .add("targetingKey", user.email())
+            .add("clientEmail", user.email()));
+    try (Scope ignored = discountEnabledspan.makeCurrent()) {
+        var evaluationDetails = openFeatureAPIClient.getBooleanDetails("discount-enabled", false);
+
+        LOGGER.info(evaluationDetails.toString());
+        boolean isDiscountEnabled = evaluationDetails.getValue();
+        if (isDiscountEnabled) {
+            double originalPrice = instrument.price();
+            double discountAmount = openFeatureAPIClient.getDoubleValue("discount-amount", 0.1);
+            double discountedPrice = originalPrice * (1.0 - discountAmount);
+            return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
+        }
+        return Result.success(instrument);
+    } finally {
+        discountEnabledspan.end();
+    }
+}
+```
+
+Add then the following import:
+
+```java
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 ```
 
 🛠️ Restart Quarkus:
@@ -203,5 +275,5 @@ You should see this screen:
 ![Jaeger Query](./assets/JaegerUI_Post.png)
 
 :::info
-ℹ️ You don't see a whole transaction from Quarkus to Go Feature Flag because the configuration is not downloaded through an API call.
+ℹ️ You don't see a whole transaction from Quarkus to Go Feature Flag because the configuration is not downloaded through an API call. It's due to the **in-process evaluation** we discussed earlier. The Java application (via the OpenFeature provider) polls the rules in the background and evaluates the flag locally in its own memory. Since no network call is made at the exact moment of flag evaluation, there is no direct HTTP request to trace between Quarkus and Go Feature Flag during the transaction.
 :::
