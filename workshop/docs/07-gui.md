@@ -20,9 +20,9 @@ First, make sure to stop the running GUI process by typing ``CTRL+C`` in its ter
 🛠️ Install OpenFeature and the Go Feature Flag Angular Web Provider SDK:
 
 ```bash
-$ cd gui
-$ npm install @openfeature/go-feature-flag-web-provider
-$ npm install @openfeature/angular-sdk
+cd gui
+npm install @openfeature/go-feature-flag-web-provider
+npm install @openfeature/angular-sdk
 ```
 
 🛠️  Open the file `gui/src/app/app.config.ts`.
@@ -140,7 +140,7 @@ To:
 🛠️ Restart the frontend server (if needed):
 
 ```bash
-$ npm start
+npm start
 ```
 
 :::warning
