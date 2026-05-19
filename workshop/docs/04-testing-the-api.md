@@ -97,22 +97,22 @@ First, enable the OpenFeature libraries in your classpath in the `pom.xml` file.
 📝 Uncomment this section:
 
 ```xml
-   <dependency>
-            <groupId>dev.openfeature</groupId>
-            <artifactId>sdk</artifactId>
-            <version>1.20.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.openfeature.contrib.providers</groupId>
-            <artifactId>flagd</artifactId>
-            <version>0.11.20</version>
-        </dependency>
+<dependency>
+    <groupId>dev.openfeature</groupId>
+    <artifactId>sdk</artifactId>
+    <version>1.20.1</version>
+</dependency>
+<dependency>
+    <groupId>dev.openfeature.contrib.providers</groupId>
+    <artifactId>flagd</artifactId>
+    <version>0.11.20</version>
+</dependency>
 ```
 🛠️ Run the following command in a console:
 
 ```bash
-$ cd api
-$ ./mvnw compile
+cd api
+./mvnw compile
 ```
 
 🛠️ Refresh your editor.
@@ -122,11 +122,11 @@ $ ./mvnw compile
 🛠️ Add a new attribute to get the `OpenFeatureAPI` instance and update the constructor as follows:
 
 ```java
-    private final OpenFeatureAPI openFeatureAPI;
+private final OpenFeatureAPI openFeatureAPI;
 
-    public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
-        this.openFeatureAPI = openFeatureAPI;
-    }
+public DiscountAdapter(OpenFeatureAPI openFeatureAPI) {
+    this.openFeatureAPI = openFeatureAPI;
+}
 ```
 
 ℹ️ This way, the `OpenFeatureAPI` is automatically provided by CDI.
@@ -372,7 +372,7 @@ boolean isDiscountEnabled = evaluationDetails.getValue();
 Run the same API call again:
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
 ```
 
 👀 The logger will help us see what is provided through the details:
@@ -420,7 +420,7 @@ info.touret.musicstore.infrastructure.featureflag.adapter.DiscountAdapterTest#sh
 🛠️ If you call the API again using this command:
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
 ```
 
 👀 You will see the details of the feature flag value resolution:
@@ -535,7 +535,7 @@ All 56 tests are passing (0 skipped), 56 tests were run in 1931ms. Tests complet
 🛠️ You can also run the following command:
 
 ```bash
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ## Evaluation Context
@@ -681,7 +681,7 @@ All 57 tests are passing (0 skipped), 57 tests were run in 9704ms. Tests complet
 🛠️ You can also run the following command:
 
 ```bash
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ℹ️ Now let's enhance our targeting rules. We will implement this rule sets:

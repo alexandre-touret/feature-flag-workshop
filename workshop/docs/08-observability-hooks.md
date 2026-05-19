@@ -201,6 +201,13 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 
 In order to better visualize traces in Jaeger, we can also add some manual spans in our code.
 
+📝 In the class ``DiscountAdapter``, create and inject a ``Tracer`` object:
+
+```java
+@Inject
+Tracer tracer;
+```
+
 📝 In the class ``DiscountAdapter``, update the ``applyDiscount()`` method:
 - Annotating it with ``@WithSpan``
 - Creating a new span [to get OpenFeature insights](https://github.com/open-feature/java-sdk-contrib)
@@ -239,6 +246,9 @@ Add then the following import:
 ```java
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.context.Scope;
+import jakarta.inject.Inject;
 ```
 
 🛠️ Restart Quarkus:

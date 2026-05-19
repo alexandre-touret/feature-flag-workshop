@@ -129,7 +129,7 @@ discount-enabled:
 🛠️ Run Quarkus again in the `api` folder:
 
 ```bash
-$ ./mvnw clean quarkus:dev
+./mvnw clean quarkus:dev
 ```
 
 Wait until you see the Quarkus logo:

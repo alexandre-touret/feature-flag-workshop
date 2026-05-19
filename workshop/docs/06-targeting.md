@@ -70,7 +70,7 @@ discount-amount:
 📝 Check then the evaluation with the Go Feature Flag API to validate it parsed correctly without errors:
 
 ```bash
-$ http POST http://localhost:1031/v1/allflags \
+http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@musician.com"}}'
 ```
 
@@ -111,7 +111,7 @@ $ http POST http://localhost:1031/v1/allflags \
 📝 Now if you use another email address domain:
 
 ```bash
-$ http POST http://localhost:1031/v1/allflags \
+http POST http://localhost:1031/v1/allflags \
   user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@somewhereelse.com"}}'
 
 ```
@@ -169,7 +169,7 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext()
 🛠️ Test it with a standard user (should NOT get the discount):
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FRANCE"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FRANCE"}' accept:"application/json"
 ```
 
 👀 The `hasDiscount` field in the response **should not be filled**.
@@ -177,7 +177,7 @@ $ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"joh
 🛠️ Now test it with a premium musician (should get the discount):
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"Eric","lastName":"Clapton","email":"eric.clapton@musician.com","country":"UK"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"Eric","lastName":"Clapton","email":"eric.clapton@musician.com","country":"UK"}' accept:"application/json"
 ```
 
 👀 The `hasDiscount` field should be filled and set to `true`. The `price` should be reduced.
@@ -337,19 +337,19 @@ Because the hashing algorithm is deterministic, `john.doe@musician.com` will alw
 🛠️ Ensure the GO Feature Flag container is still running and restart Quarkus:
 
 ```bash
-$ ./mvnw clean quarkus:dev
+./mvnw clean quarkus:dev
 ```
 
 🛠️ You can test this behavior by making requests to the API with different user emails. Open a new terminal and run:
 
 ```bash
-$ http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user1@musician.com","country":"UK"}' accept:"application/json"
+http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user1@musician.com","country":"UK"}' accept:"application/json"
 ```
 
 👀 Run the [K6 command](https://k6.io/) to check how the bucketing works:
 
 ```bash
-$ cd /workspaces/feature-flag-workshop/infrastructure/scripts/ ; k6 run k6-discount-enabled-test.js
+cd /workspaces/feature-flag-workshop/infrastructure/scripts/ ; k6 run k6-discount-enabled-test.js
 
 ```
 
@@ -472,8 +472,8 @@ You can use [this web tool](https://time.now/tool/iso-8601-converter/) to conver
 🛠️ Run the K6 script immediately to see the initial rollout percentage (should be close to 0%):
 
 ```bash
-$ cd ../infrastructure/scripts
-$ k6 run k6-discount-enabled-test.js
+cd ../infrastructure/scripts
+k6 run k6-discount-enabled-test.js
 ```
 
 ☕ Wait 2 minutes, and run the script again. You should see the percentage of users getting the discount automatically increase to around 40%!
