@@ -5,7 +5,7 @@ title: 9. Conclusion
 
 # Conclusion
 
-Congratulations! You've successfully completed this Code Lab.
+Congratulations! You've successfully completed this Code Lab 🎉.
 
 ## What we covered
 
