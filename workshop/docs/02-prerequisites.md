@@ -140,15 +140,15 @@ You can then open this project in either your local VS Code or directly in your 
 * Log on [GitHub](https://github.com/) and
   [fork this repository](https://github.com/alexandre-touret/feature-flag-workshop/fork).
 * Click on ``Code>Codespaces>Create a codespace`` on the ``main`` branch
-
+<div style={{textAlign: 'center'}}>
 ![start codespace](./assets/start_build_codespace.png)
-
+</div>
 When a message invites you making a URL public, select and validate it.
 
 Wait until the codeSpace is ready.
-
+<div style={{textAlign: 'center'}}>
 ![build codespace](./assets/build_codespace.png)
-
+</div>
 During the first startup, the maven build is automatically started. Please wait until it is completely finished.
 
 ### 🛠 Start the backend
@@ -181,25 +181,25 @@ You don't therefore have to bother yourself about setting it up.
 Go to the VS Code Port panel.
 
 Select the port tab:
-
+<div style={{textAlign: 'center'}}>
 ![Port VSCODE](./assets/port_vscode.png)
-
+</div>
 Configure the port as public:
-
+<div style={{textAlign: 'center'}}>
 ![Port Visibility VSCODE](./assets/change_port_visibility.png)
-
+</div>
 And now, go the URL which exposes the 8080 port:
-
+<div style={{textAlign: 'center'}}>
 ![start-8080](./assets/start_dev_ui.png)
-
+</div>
 and add the ``/q/dev-ui`` suffix.
 
 For instance: ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev/q/dev-ui``
 
 ℹ️ You can also browse the dev-ui to the ``Extensions>SmallRye OpenAPI``.
-
+<div style={{textAlign: 'center'}}>
 ![Small Rye](./assets/dev_ui_extensions.png)
-
+</div>
 :::warning
 
 Unfortunately you will unable to test this API through the SwaggerUI. It seems to not support the usage of JSON headers.

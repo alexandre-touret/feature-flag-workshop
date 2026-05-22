@@ -12,6 +12,8 @@ The project is divided into three main components:
 - **`/gui`**: A frontend web application built with [Angular](https://angular.dev/). It provides a user interface to browse the instrument catalog and observe feature flags in action.
 - **`/workshop`**: Contains the Markdown source files for the workshop documentation, built and hosted using Docusaurus.
 
+You could then find a solution in the `solution` branch.
+
 ## Ready to go?
 To get started, follow the full step-by-step instructions available on the workshop website:
 
