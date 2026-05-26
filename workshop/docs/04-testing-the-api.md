@@ -142,7 +142,6 @@ import dev.openfeature.sdk.OpenFeatureAPI;
 ```java
     @Override
     public Result<Instrument> applyDiscount(Instrument instrument, User user) {
-        // TODO: Chapter 3 - Implement this with OpenFeature
         // For now, let's keep it simple (manually toggle for testing if needed)
 //        boolean manualDiscount = false; // Toggle to true to test UI
 //        if (manualDiscount) {
@@ -496,7 +495,7 @@ import dev.openfeature.contrib.providers.flagd.FlagdProvider;
 ```
 ℹ️ This setup relies on a file located at `src/main/resources/flags.flagd.json`.
 
-📝 We can now push the former rules to this file as follows:
+🛠️ Create it and push the corresponding former rules to this file as follows:
 
 ```json
 {
