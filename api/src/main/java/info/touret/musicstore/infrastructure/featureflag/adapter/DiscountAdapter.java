@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO: Chapter 3 - Uncomment to use OpenFeature
+// TODO: Uncomment to use OpenFeature
 // import dev.openfeature.sdk.Client;
 // import dev.openfeature.sdk.MutableContext;
 // import dev.openfeature.sdk.OpenFeatureAPI;
@@ -18,7 +18,6 @@ public class DiscountAdapter implements DiscountPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscountAdapter.class);
     @Override
     public Result<Instrument> applyDiscount(Instrument instrument, User user) {
-        // TODO: Chapter 3 - Implement this with OpenFeature
         // For now, let's keep it simple (manually toggle for testing if needed)
         boolean manualDiscount = false; // Toggle to true to test UI
         if (manualDiscount) {

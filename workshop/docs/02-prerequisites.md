@@ -82,7 +82,9 @@ You **MUST** have sat up these tools first:
 **Java**
 
 ```jshelllanguage
-$ java -version
+java -version
+```
+```jshelllanguage
 openjdk version "25.0.2" 2026-01-20 LTS
 OpenJDK Runtime Environment Temurin-25.0.2+10 (build 25.0.2+10-LTS)
 OpenJDK 64-Bit Server VM Temurin-25.0.2+10 (build 25.0.2+10-LTS, mixed mode, sharing)
@@ -91,7 +93,9 @@ OpenJDK 64-Bit Server VM Temurin-25.0.2+10 (build 25.0.2+10-LTS, mixed mode, sha
 **Maven**
 
 ```jshelllanguage
-$ mvn --version
+mvn --version
+```
+```jshelllanguage
 Apache Maven 3.9.14 (996c630dbc656c76214ce58821dcc58be960875b)
 Maven home: /home/alexandre/.sdkman/candidates/maven/current
 Java version: 25.0.2, vendor: Eclipse Adoptium, runtime: /home/alexandre/.sdkman/candidates/java/25.0.2-tem
@@ -102,7 +106,9 @@ OS name: "linux", version: "6.6.87.2-microsoft-standard-wsl2", arch: "amd64", fa
 **Docker**
 
 ```jshelllanguage
-$ docker version
+docker version
+```
+```jshelllanguage
 Client:
 Version:           27.2.1-rd
 API version:       1.45 (downgraded from 1.47)
@@ -115,13 +121,20 @@ Context:           default
 ```
 
 **NodeJS**
-$ node --version
+
+```bash
+node --version
+```
+```jshelllanguage
 v24.11.1
+```
 
 **NPM**
 
 ```jshelllanguage
-$ npm --version
+npm --version
+```
+```jshelllanguage
 11.12.1
 ```
 
@@ -156,8 +169,8 @@ During the first startup, the maven build is automatically started. Please wait 
 In a new terminal, start the Quarkus Dev environment:
 
 ```jshelllanguage
-$ cd api
-$ ./mvnw quarkus:dev
+cd api
+./mvnw quarkus:dev
 ```
 
 👀 Wait a while until you get the following output:
@@ -205,7 +218,7 @@ For instance: ``https://laughing-giggle-x5x4rqxpwfv5pj-8080.app.github.dev/q/dev
 Unfortunately you will unable to test this API through the SwaggerUI. It seems to not support the usage of JSON headers.
 
 :::
-You can test it using httpie in a console :
+You can test it using httpie in a new terminal :
 
 ```bash
 http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
@@ -213,6 +226,54 @@ http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.
 
 ```bash
 http :8080/orders User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FR"}' accept:"application/json"
+```
+
+For the latter, you would get such a content:
+
+```bash
+
+[
+    {
+        "customer": {
+            "address": {
+                "city": "Paris",
+                "country": "France",
+                "number": "10",
+                "street": "Rue de Paris",
+                "zipCode": "75001"
+            },
+            "email": "alice@test.com",
+            "firstName": "Alice",
+            "id": 1,
+            "lastName": "Smith"
+        },
+        "id": 1,
+        "instruments": [
+            {
+                "description": "Classic Stratocaster",
+                "id": 1,
+                "manufacturer": "Fender",
+                "name": "Stratocaster",
+                "price": 1200.0,
+                "reference": "FEN-STR-01",
+                "type": "GUITAR"
+            },
+            {
+                "description": "Classic Vibe Stratocaster",
+                "id": 51,
+                "manufacturer": "Squier",
+                "name": "Classic Vibe Strat",
+                "price": 400.0,
+                "reference": "SQU-STR-01",
+                "type": "GUITAR"
+            }
+        ],
+        "orderDate": "2024-01-01T10:00:00Z",
+        "orderStatus": "CREATED",
+        "reference": "a0000000-0000-0000-0000-000000000001"
+    },
+    [...]
+]
 ```
 
 ### 🛠 Start the frontend
@@ -255,15 +316,13 @@ to
 In a new terminal, start the frontend dev environment:
 
 ```jshelllanguage
-$ cd gui
-$ npm start
+cd gui
+npm start
 ```
 
 👀 Wait a while until you get the following output:
 
-```jshelllanguage
-$ npm start
-
+```bash
 > music-store-gui@0.0.0 start
 > ng serve
 
