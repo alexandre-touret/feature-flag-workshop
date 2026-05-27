@@ -322,7 +322,7 @@ public OpenFeatureAPI getOpenFeatureAPIInstance() {
 }
 ```
 
-🛠️ Update then the import declarations with:
+🛠️ Remove the former import referring to FladD and update then the import declarations with:
 
 ```java
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
@@ -369,7 +369,7 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountr
 
 ```bash
 --
-All 58 tests are passing (0 skipped), 58 tests were run in 23469ms. Tests completed at 11:28:57.
+All 59 tests are passing (0 skipped), 7 tests were run in 2369ms. Tests completed at 12:46:20 due to changes to DiscountAdapter.class.
 Press [e] to edit command line args (currently ''), [r] to re-run, [o] Toggle test output, [:] for the terminal, [h] for more options>
 ```
 
