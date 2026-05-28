@@ -444,7 +444,7 @@ If the canary release goes well, the percentage of users seeing the feature is g
 ### Implementing a Canary Deployment
 
 Go Feature Flag supports scheduled progressive rollouts natively!
-We will implement a scenario where users with a `@musician.com` emails get  **time-based progressive rollout** of the new feature. Over the course of 4 days, the percentage of users seeing the new variation will smoothly and automatically scale from a small percentage up to a larger one!
+We will implement a scenario where users with a `@musician.com` emails get  **time-based progressive rollout** of the new feature.
 
 🛠 Create a specific configuration file for canary deployments: `api/src/main/docker/go-feature-flag/canary-flags.yaml`.
 
@@ -477,8 +477,8 @@ discount-enabled:
     - query: clientCountry in ["FRANCE", "GERMANY", "UK"] and clientEmail ew "musician.com"
       progressiveRollout:
         initial:
-          variation: on
-          percentage: 20
+          variation: off
+          percentage: 80
           date: 2026-04-28T05:00:00.100Z
         end:
           variation: on
@@ -507,8 +507,15 @@ discount-amount:
 Update the date used in this file with the current date
 :::
 
-### Updating the Docker configuration
+#### How it works behind the scenes
+With this configuration we will implement the following workflow:
 
+1. Before the initial date, the flag will return `off` 80% of the time and ``on`` 20% of the time.
+2. Between the initial and end date, the flag will gradually shift to return ``on`` more instead of ``off``.
+3. After the end date, the flag will return ``on`` 80% of the time and ``off`` 20% of the time.
+
+
+### Updating the Docker configuration
 
 📝 Open `api/src/main/docker/compose-devservices.yml`.
 🛠️ Change the `volumes` configuration uncommenting the corresponding line:
@@ -570,15 +577,15 @@ If it doesn't, feel free to restart Quarkus.
 
 You can test this setup using the Go Feature Flag REST API. Since the progressive rollout is time-dependent, the evaluation result changes dynamically based on the current date relative to the configured `initial` and `end` dates!
 
-To really see the canary rollout in action, let's configure a very short timeframe in `canary-flags.yaml`!
+To really see the canary rollout in action, let's configure a very short timeframe in `canary-flags.yaml`.
 
 📝 Edit `api/src/main/docker/go-feature-flag/canary-flags.yaml` and set the `initial` date to **now** and the `end` date to **5 minutes from now** for the `discount-enabled` flag:
 
 ```yaml
       progressiveRollout:
         initial:
-          variation: on
-          percentage: 0
+          variation: off
+          percentage: 100
           date: 2026-04-29T10:00:00.000Z # Set this to NOW
         end:
           variation: on
@@ -598,8 +605,8 @@ cd /workspaces/feature-flag-workshop/infrastructure/scripts/
 k6 run k6-discount-enabled-test.js
 ```
 
-☕ Wait 2 minutes, and run the script again. You should see the percentage of users getting the discount automatically increase to around 40%!
+☕ Wait 2 minutes, and run the script again. You should see the percentage of users getting the discount automatically increase to around 40%.
 
-☕ Wait another 3 minutes (until the `end` date is passed), and run the script one last time. You should now see 100% of the users getting the new feature!
+☕ Wait another 3 minutes (until the `end` date is passed), and run the script one last time. You should now see 100% of the users getting the new feature.
 
-The feature is gradually exposed to more and more users automatically over time, without any redeployment or manual intervention!
+The feature is gradually exposed to more and more users automatically over time, without any redeployment or manual intervention.
