@@ -17,7 +17,7 @@ In the previous chapters, we configured feature flags on the backend side to con
 
 First, make sure to stop the running GUI process by typing ``CTRL+C`` in its terminal.
 
-🛠️ Install OpenFeature and the Go Feature Flag Angular Web Provider SDK:
+🛠️ Go to the root of the project. Next, install OpenFeature and the Go Feature Flag Angular Web Provider SDK:
 
 ```bash
 cd gui
@@ -38,7 +38,9 @@ importProvidersFrom(
   })
 )
 ```
-🛠️ Replace the endpoint value with the GUI's URL provided in the port screen with the `feature` path. For instance: ``https://sturdy-system-5gvq9q5p7x3vggp-4200.app.github.dev/feature``.
+🛠️ Replace the endpoint value with the GUI's URL (the ``4200``port URL) provided in the port screen with the `feature` path. For instance: ``https://sturdy-system-5gvq9q5p7x3vggp-4200.app.github.dev/feature``.
+
+This URL is a proxy to Go Feature Flag.
 
 And ensure the required imports are declared at the top of the file:
 
@@ -47,7 +49,7 @@ import {OpenFeatureModule} from '@openfeature/angular-sdk';
 import {GoFeatureFlagWebProvider} from '@openfeature/go-feature-flag-web-provider';
 ```
 
-Update also the ``@angular/core`` import declaration:
+Update then the ``@angular/core`` import declaration:
 
 ```typescript
 import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection} from '@angular/core';
@@ -136,18 +138,38 @@ To:
     this.showDiscountBanner.set(this.featureFlagService.isDiscountEnabled());
   }
 ```
+🛠️ Restart the backend server (if needed):
+
+In a new terminal:
+
+```bash
+cd api
+./mvnw quarkus:dev
+```
 
 🛠️ Restart the frontend server (if needed):
 
+In a new terminal:
+
 ```bash
+cd gui
 npm start
 ```
 
 :::warning
 Check in your VS Code Port menu if the ports 4200,1031 are declared as public. If not, switch them from private to public.
+
+<div style={{textAlign: 'center'}}>
+![start codespace](./assets/port-visibility.png)
+</div>
+
 :::
 
 ✅ Open the application in your browser. Change your user email (e.g. to `test@musician.com`) and country (e.g. to `UK`) via the user settings. The page will reload and you should see the discount banner appear based on your targeting rules!
+
+<div style={{textAlign: 'center'}}>
+![start codespace](./assets/user_details.png)
+</div>
 
 ## Event Management
 
