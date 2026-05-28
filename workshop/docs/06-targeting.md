@@ -172,6 +172,22 @@ openFeatureAPIClient.setEvaluationContext(new MutableContext()
 http :8080/instruments User:'{"firstName":"john","lastName":"Doe","email":"john.doe@gmail.com","country":"FRANCE"}' accept:"application/json"
 ```
 
+👀 You should get a list of instruments like this :
+
+```json
+[...]
+{
+      "description": "MIDI Controller / Sequencer",
+      "id": 100,
+      "manufacturer": "Arturia",
+      "name": "KeyStep Pro",
+      "price": 450.0,
+      "reference": "ART-KEY-01",
+      "type": "PIANO"
+}
+[...]
+```
+
 👀 The `hasDiscount` field in the response **should not be filled**.
 
 🛠️ Now test it with a premium musician (should get the discount):
@@ -182,11 +198,26 @@ http :8080/instruments User:'{"firstName":"Eric","lastName":"Clapton","email":"e
 
 👀 The `hasDiscount` field should be filled and set to `true`. The `price` should be reduced.
 
+For instance:
+```json
+{
+        "description": "MIDI Controller / Sequencer",
+        "hasDiscount": true,
+        "id": 100,
+        "manufacturer": "Arturia",
+        "name": "KeyStep Pro",
+        "originalPrice": 450.0,
+        "price": 360.0,
+        "reference": "ART-KEY-01",
+        "type": "PIANO"
+}
+```
+
 🛠️ Update the unit tests:
 
 Go to the ``api/src/test/java/info/touret/musicstore/infrastructure/featureflag/adapter/DiscountAdapterTest.java`` class.
 
-Update all the user objects creation in every test method. Add ``musician.com`` as domain name.For instance:
+Update **ALL the user objects creations** in every test method. Add ``musician.com`` as domain name.For instance:
 
 
 ```java
@@ -206,8 +237,8 @@ void should_return_discount_not_enabled_with_unknown_mail_successfully() {
 You should get this output in the Quarkus console:
 
 ```bash
- --
-All 59 tests are passing (0 skipped), 4 tests were run in 2257ms. Tests completed at 15:28:05 due to changes to DiscountAdapterTest.class.
+--
+All 60 tests are passing (0 skipped), 60 tests were run in 2865ms. Tests completed at 12:55:02.
 ```
 
 ## Bucketing & Progressive Rollouts
@@ -231,7 +262,7 @@ Using bucketing, we can assign exactly 50% of our users to the "A" group (e.g., 
 
 Let's implement an A/B test (or 50/50 progressive rollout) for our `welcome-message` flag and our `discount-enabled` flag. We want 50% of our users to see the new variation and 50% to see the old one.
 
-📝 Create a a specific configuration file for A/B testing: `api/src/main/docker/go-feature-flag/abtesting-flags.yaml`.
+🛠️ Create a a specific configuration file for A/B testing: `api/src/main/docker/go-feature-flag/abtesting-flags.yaml`.
 
 Let's configure it:
 
@@ -274,7 +305,7 @@ discount-amount:
 To tell Go Feature Flag to use this new configuration file instead of the default `flags.yaml`, we need to update the proxy configuration.
 
 📝 Open `api/src/main/docker/compose-devservices.yml`.
-🛠️ Change the `volumes` configuration uncommenting the different lines:
+🛠️ Change the `volumes` configuration uncommenting the correspondig line:
 
 ```yaml
 services:
@@ -285,7 +316,7 @@ services:
     volumes:
       - ./go-feature-flag/flags.yaml:/goff/flags.yaml
       - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
-      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      # - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
       - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
     environment:
       - POLLING_INTERVAL=1000
@@ -293,7 +324,7 @@ services:
 
 
 📝 Open `api/src/main/docker/compose-test-devservices.yml`.
-🛠️ Change the `volumes` configuration uncommenting the different lines:
+🛠️ Change the `volumes` configuration uncommenting the corresponding line:
 
 ```yaml
 services:
@@ -304,7 +335,7 @@ services:
     volumes:
       - ./go-feature-flag/flags.yaml:/goff/flags.yaml
       - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
-      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      #- ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
       - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
     environment:
       - POLLING_INTERVAL=1000
@@ -340,7 +371,7 @@ Because the hashing algorithm is deterministic, `john.doe@musician.com` will alw
 ./mvnw clean quarkus:dev
 ```
 
-🛠️ You can test this behavior by making requests to the API with different user emails. Open a new terminal and run:
+🛠️ You can test this behavior by making requests to the API with different email addresses. Open a new terminal and run:
 
 ```bash
 http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"user1@musician.com","country":"UK"}' accept:"application/json"
@@ -350,8 +381,57 @@ http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"use
 
 ```bash
 cd /workspaces/feature-flag-workshop/infrastructure/scripts/ ; k6 run k6-discount-enabled-test.js
+```
+
+You would get such a distribution:
+
+```bash
+@alexandre-touret ➜ /workspaces/feature-flag-workshop/infrastructure/scripts (main) $ cd /workspaces/feature-flag-workshop/infrastructure/scripts/ ; k6 run k6-discount-enabled-test.js
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+
+     execution: local
+        script: k6-discount-enabled-test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 20 iterations shared among 1 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+INFO[0000] User: user1@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0001] User: user2@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0001] User: user3@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0002] User: user4@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0002] User: user5@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0003] User: user6@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0003] User: user7@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0003] User: user8@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0004] User: user9@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0004] User: user10@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0004] User: user11@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0005] User: user12@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0005] User: user13@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0005] User: user14@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0006] User: user15@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0006] User: user16@musician.com -> has discount (hasDiscount present): false  source=console
+INFO[0006] User: user17@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0007] User: user18@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0007] User: user19@musician.com -> has discount (hasDiscount present): true  source=console
+INFO[0008] User: user20@musician.com -> has discount (hasDiscount present): false  source=console
+
+
+  █ TOTAL RESULTS
+
+    checks_total.......: 20      2.502412/s
+    checks_succeeded...: 100.00% 20 out of 20
+    checks_failed......: 0.00%   0 out of 20
 
 ```
+
 
 ## Canary Deployment
 
@@ -427,7 +507,48 @@ discount-amount:
 Update the date used in this file with the current date
 :::
 
-### Switching Configuration in the Proxy
+### Updating the Docker configuration
+
+
+📝 Open `api/src/main/docker/compose-devservices.yml`.
+🛠️ Change the `volumes` configuration uncommenting the corresponding line:
+
+```yaml
+services:
+  go-feature-flag:
+    image: gofeatureflag/go-feature-flag:trixie
+    ports:
+      - "1031:1031"
+    volumes:
+      - ./go-feature-flag/flags.yaml:/goff/flags.yaml
+      - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
+      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
+    environment:
+      - POLLING_INTERVAL=1000
+```
+
+
+📝 Open `api/src/main/docker/compose-test-devservices.yml`.
+🛠️ Change the `volumes` configuration uncommenting the corresponding line:
+
+```yaml
+services:
+  go-feature-flag:
+    image: gofeatureflag/go-feature-flag:trixie
+    ports:
+      - "1032:1031"
+    volumes:
+      - ./go-feature-flag/flags.yaml:/goff/flags.yaml
+      - ./go-feature-flag/abtesting-flags.yaml:/goff/abtesting-flags.yaml
+      - ./go-feature-flag/canary-flags.yaml:/goff/canary-flags.yaml
+      - ./go-feature-flag/proxy.yaml:/goff/goff-proxy.yaml
+    environment:
+      - POLLING_INTERVAL=1000
+
+```
+
+### Switching configuration in the proxy
 
 Once again, we need to instruct the Relay Proxy to load this specific file.
 
@@ -443,6 +564,7 @@ retrievers:
 ```
 
 The Go Feature Flag Relay Proxy will automatically update its configuration!
+If it doesn't, feel free to restart Quarkus.
 
 ### Testing the Canary Release
 
@@ -472,7 +594,7 @@ You can use [this web tool](https://time.now/tool/iso-8601-converter/) to conver
 🛠️ Run the K6 script immediately to see the initial rollout percentage (should be close to 0%):
 
 ```bash
-cd ../infrastructure/scripts
+cd /workspaces/feature-flag-workshop/infrastructure/scripts/
 k6 run k6-discount-enabled-test.js
 ```
 
