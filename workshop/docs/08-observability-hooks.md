@@ -104,6 +104,17 @@ http :8080/instruments User:'{"firstName":"test","lastName":"user1","email":"use
 2026-05-05 11:15:37,187 ERROR [info.touret.musicstore.infrastructure.featureflag.openfeature.ErrorHandlerHook] (quarkus-virtual-thread-0) >>> Unable to process this flag [discount-enabled]: GO Feature Flag requires a targeting key
 ```
 
+📝 Finally, restore the declaration of the ``targetingKey`` in the method ``applyDiscount()`` of the class ``DiscountAdapter``:
+
+```java
+openFeatureAPIClient.setEvaluationContext(new MutableContext()
+                .add("clientCountry", user.country())
+                .add("targetingKey", user.email())
+                .add("clientEmail", user.email()));
+```
+
+
+
 ## Use the OpenTelemetry Hook
 
 Analysing the whole feature-flag's process could be tricky. Let's see how [OpenTelemetry](https://opentelemetry.io/) can help us.
@@ -259,10 +270,10 @@ import jakarta.inject.Inject;
 
 ### Test
 
-🛠️ Run again K6 to simulate some traffic. In another terminal, run the following command:
+🛠️ Run again K6 to simulate some traffic. In a new terminal, run the following command:
 
 ```bash
-cd ../infrastructure/scripts
+cd infrastructure/scripts
 k6 run k6-discount-enabled-test.js
 ```
 
