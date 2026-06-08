@@ -63,7 +63,7 @@ const config: Config = {
       title: 'Feature-Flag Workshop',
       logo: {
         alt: 'Code Lab Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo.webp',
       },
       items: [
         {
