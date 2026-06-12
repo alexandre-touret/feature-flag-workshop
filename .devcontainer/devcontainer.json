@@ -11,7 +11,7 @@
       "version": "25",
       "mavenVersion": "latest"
     },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+    "ghcr.io/devcontainers/features/docker-in-docker:3.0.1": {
       "moby": true,
       "azureDnsAutoDetection": true,
       "installDockerBuildx": true,
