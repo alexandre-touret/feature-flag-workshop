@@ -357,6 +357,33 @@ To:
 openFeatureAPIClient.setEvaluationContext(new MutableContext().add("clientCountry", user.country()).add("targetingKey", user.email()));
 ```
 
+:::warning
+ ℹ️ Whether you omit to implement the FlagD setup or you are attending the 1H30 workshop, you can copy / paste the content of the entire ``applyDiscount()`` method:
+
+```java
+    @Override
+       public Result<Instrument> applyDiscount(Instrument instrument, User user) {
+           var openFeatureAPIClient = this.openFeatureAPI.getClient();
+           openFeatureAPIClient.setEvaluationContext(new MutableContext()
+                   .add("clientCountry", user.country())
+                   .add("targetingKey", user.email()));
+               var evaluationDetails = openFeatureAPIClient.getBooleanDetails("discount-enabled", false);
+               LOGGER.info(evaluationDetails.toString());
+               boolean isDiscountEnabled = evaluationDetails.getValue();
+               if (isDiscountEnabled) {
+                   double originalPrice = instrument.price();
+                   double discountAmount = openFeatureAPIClient.getDoubleValue("discount-amount", 0.1);
+                   double discountedPrice = originalPrice * (1.0 - discountAmount);
+                   return Result.success(instrument.withDiscount(discountedPrice, originalPrice));
+               }
+               return Result.success(instrument);
+       }
+```
+
+:::
+
+
+
 🛠️ Restart Quarkus:
 
 ```bash
