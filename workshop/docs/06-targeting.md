@@ -71,7 +71,7 @@ discount-amount:
 
 ```bash
 http POST http://localhost:1031/v1/allflags \
-  user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@musician.com"}}'
+  user:='{"key": "client-fr-1", "custom": {"clientCountry": "UK", "clientEmail":"user@musician.com"}}'
 ```
 
 👀 You should get all the flags:
@@ -112,7 +112,7 @@ http POST http://localhost:1031/v1/allflags \
 
 ```bash
 http POST http://localhost:1031/v1/allflags \
-  user:='{"key": "client-fr-1", "custom": {"clientCountry": "FRANCE", "clientEmail":"user@somewhereelse.com"}}'
+  user:='{"key": "client-fr-1", "custom": {"clientCountry": "UK", "clientEmail":"user@somewhereelse.com"}}'
 
 ```
 ```json
@@ -121,7 +121,7 @@ http POST http://localhost:1031/v1/allflags \
         "discount-amount": {
             "errorCode": "",
             "reason": "TARGETING_MATCH",
-            "timestamp": 1777295407,
+            "timestamp": 1789022486,
             "trackEvents": true,
             "value": 0.2,
             "variationType": "20-percent"
@@ -129,7 +129,7 @@ http POST http://localhost:1031/v1/allflags \
         "discount-enabled": {
             "errorCode": "",
             "reason": "DEFAULT",
-            "timestamp": 1777295407,
+            "timestamp": 1789022486,
             "trackEvents": true,
             "value": false,
             "variationType": "off"
@@ -137,7 +137,7 @@ http POST http://localhost:1031/v1/allflags \
         "welcome-message": {
             "errorCode": "",
             "reason": "STATIC",
-            "timestamp": 1777295407,
+            "timestamp": 1789022486,
             "trackEvents": true,
             "value": true,
             "variationType": "on"
@@ -145,6 +145,7 @@ http POST http://localhost:1031/v1/allflags \
     },
     "valid": true
 }
+
 
 ```
 
@@ -223,6 +224,14 @@ Update **ALL the user objects creations** in every test method. Add ``musician.c
 ```java
 var userGB = new User("John", "Doe", "john.doe@musician.com", "UK");
 ```
+
+:::info
+ ℹ️ If it has not been applied so far (e.g., if you run the 1H30 workshop), update the ``user`` attribute creation :
+
+```java
+ user = new User("John", "Doe", "john.doe@musician.com", "FRANCE");
+```
+:::
 
 Create then another test method to check the newly implemented rule:
 
